@@ -11,13 +11,13 @@ frontend/
 - Path: frontend/
 - Language: TypeScript (React)
 - Test Directory: frontend/src/__tests__
-- Test Framework: Vitest (TBD)
+- Test Framework: Vitest (TBD — frontend not yet built)
 
 backend/
 - Path: backend/
 - Language: TypeScript (Node.js / Express)
 - Test Directory: backend/src/__tests__
-- Test Framework: Jest or Vitest (TBD)
+- Test Framework: Vitest v2
 
 db/
 - Path: db/
@@ -159,7 +159,7 @@ npm run typecheck --prefix frontend
 - **tsx** — backend TypeScript execution and hot-reload in development (via `npm run dev`)
 - **ESLint 9** — flat config format (`eslint.config.js`), with TypeScript and import plugins
 - **Prettier 3** — code formatting (config: `.prettierrc.json`)
-- **Vitest 2** — backend unit and integration testing (frontend TBD)
+- **Vitest v2** — backend unit and integration testing (frontend TBD)
 - **TypeScript 5** — strict mode with `noUncheckedIndexedAccess` and `noImplicitOverride`
 
 ### External Services
@@ -220,7 +220,7 @@ Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. F
 ### 2026-05-16 — Phase 1: TypeScript backend scaffolding + ESLint
 
 - **What Changed**: Backend tooling finalized and configured
-  - **Test runner**: Vitest v2 (backend, frontend TBD)
+  - **Test runner**: Vitest v2 (backend; frontend TBD)
   - **Logger**: pino v9 (declared; wired in Phase 5)
   - **DB client**: pg v8 (raw node-postgres; wired in Phase 4)
   - **Migrations**: node-pg-migrate v7 (declared; wired in Phase 4)
@@ -228,7 +228,7 @@ Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. F
   - **Module system**: NodeNext ESM (`"type": "module"`)
   - **Hot reload**: tsx watch (dev mode)
 - **Reason**: 12-Factor config with fail-fast validation, strict TypeScript for type safety, ESLint v9 for modern JS tooling
-- **Impact**: All backend code follows strict TypeScript, structured logging (when Phase 5 completes), and fail-fast configuration validation
+- **Impact**: All backend code follows strict TypeScript, structured logging, and fail-fast configuration validation
 - **Enforced**:
   - No `console.log()` in production code (ESLint error)
   - No hardcoded config values (must use `config` object from `src/config/env.ts`)
@@ -244,6 +244,5 @@ Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. F
 
 ## Notes
 
-- Specific library choices (DnD library, ORM, test runner) TBD during first implementation task — record the decision here when made
-- Docker Compose service names: `frontend`, `backend`, `db` (or similar — finalize in docker-compose.yml)
+- Docker Compose service names: `frontend` (TBD), `backend`, `db`
 - Keep Development Commands updated as build scripts are added to package.json files

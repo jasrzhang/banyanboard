@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.env.*
+coverage
+.git
+src/__tests__
+vitest.config.ts
+tsconfig.eslint.json
+*.tsbuildinfo

@@ -123,27 +123,27 @@ JSON response → React renders columns and cards
 
 ### Test Organization
 
-- **Test location**: [To be defined]
-- **File mapping**: [To be defined]
-- **Naming convention**: [To be defined]
+- **Test location**: `backend/src/__tests__/` — all test files co-located under one directory
+- **File mapping**: `<feature>.test.ts` maps to the feature being tested (e.g., `health.test.ts`, `db.test.ts`, `logger.test.ts`, `layering.test.ts`)
+- **Naming convention**: lowercase hyphenated domain noun, `.test.ts` suffix
 
 ### Test Grouping
 
-- **Within-file structure**: [To be defined]
-- **Describe/context nesting**: [To be defined]
-- **Setup sharing**: [To be defined]
+- **Within-file structure**: Top-level `describe` groups all tests for one feature; nested `describe` for sub-features or scenarios
+- **Describe/context nesting**: Max 2 levels deep (feature > scenario)
+- **Setup sharing**: Factory helpers (e.g., `captureLogger()`, `createApp()`) defined at the top of the test file; no shared fixtures across files
 
 ### Test Framework & Style
 
-- **Framework**: [To be defined]
-- **Assertion style**: [To be defined]
-- **Mocking approach**: [To be defined]
+- **Framework**: Vitest v2 — ESM-native, fast, no separate config needed beyond `vitest.config.ts`
+- **Assertion style**: `expect().toBe()`, `expect().toMatchObject()`, `expect().toHaveLength()`, `expect().rejects.toThrow()` — Vitest built-in matchers
+- **Mocking approach**: Dependency injection preferred over mocks — `createApp()` and `createLogger(deps)` enable test wiring without patching modules; `vi.mock()` reserved for unavoidable system boundaries (e.g., `node:fs` in structural tests)
 
 ### Test Scope Preferences
 
-- **Emphasis**: [To be defined]
-- **Typical test-to-source ratio**: [To be defined]
-- **What is NOT typically tested**: [To be defined]
+- **Emphasis**: Integration-first — HTTP endpoint tests use supertest against a real Express app; DB connectivity tests use real PostgreSQL (docker-compose); unit tests cover stateless helpers only
+- **Typical test-to-source ratio**: ~1 test file per feature vertical slice; 2–5 tests per file for the foundation suite (15 non-DB tests total as of Phase 6)
+- **What is NOT tested**: Docker healthcheck timing (environmental/non-deterministic), TypeScript compilation (covered by `tsc --noEmit`), ESLint rule configuration itself, third-party library internals (express routing, pg driver)
 
 <!-- AUTO-MANAGED: c4-architecture-start -->
 ## C4 Architecture
