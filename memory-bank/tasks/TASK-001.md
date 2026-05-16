@@ -349,13 +349,19 @@ The following 9 decisions are **blocking** for implementation — they MUST be r
   - *Decisions required from creative: directory layout, ORM package to install, test framework to install*
   - *Verified by: `tsc --noEmit` exits 0, `npm run lint` exits 0*
 
-- [ ] **Phase 2: Health check vertical slice**
-  - `GET /health` route registered in `src/routes/health.ts`
-  - `src/controllers/HealthController.ts` — delegates to service, returns JSON
-  - `src/services/HealthService.ts` — returns `{status: "ok"}` (optionally `dbStatus` if DB check wired)
-  - Integration tests in `backend/src/__tests__/health.test.ts` using supertest (5 tests per Test Strategy)
-  - *Decisions required from creative: healthcheck contract (single vs live+ready), test framework choice*
-  - *Verified by: `npm test --prefix backend` exits 0, `curl /health` returns `200 {"status":"ok"}`*
+- [x] **Phase 2: Health check vertical slice** ✓
+
+  **Completed**: 2026-05-16 | **Tests**: 5 (all pass) | **Code Review**: APPROVED WITH NOTES
+  - `GET /health/live` and `GET /health/ready` implemented through HealthController → HealthService → HealthRepository (stub)
+  - `backend/src/controllers/HealthController.ts` — async/await, delegates to service
+  - `backend/src/services/HealthService.ts` — uses config.serviceVersion, stub repo returns ok
+  - `backend/src/repositories/HealthRepository.ts` — Phase 2 stub: returns true
+  - `backend/src/routes/health.ts` — wires object graph, mounts to Express Router
+  - `backend/vitest.config.ts` — Vitest config with setupFiles
+  - `backend/src/__tests__/setup.ts` — sets DATABASE_URL before config module loads
+  - `backend/tsconfig.eslint.json` — includes test files for ESLint type-checking
+  - Integration tests in `backend/src/__tests__/health.test.ts` — 5/5 tests pass
+  - *Verified by: `npm test --prefix backend` exits 0, typecheck PASS, lint PASS, build PASS*
 
 - [ ] **Phase 3: Docker Compose + PostgreSQL service**
   - `Dockerfile` for backend (multi-stage: builder stage compiles TS, runtime stage runs dist/)
@@ -420,17 +426,17 @@ The following 9 decisions are **blocking** for implementation — they MUST be r
 ## Execution State
 
 **Build Status**: IDLE
-**Last Completed**: Phase 1: TypeScript backend scaffolding + ESLint
-**Phase Number**: 1 of 7 complete
+**Last Completed**: Phase 2: Health check vertical slice
+**Phase Number**: 2 of 7 complete
 **Is Multi-Phase**: YES
 **Can Resume**: NO
 
 ### Current Build Step
-**Step**: Step 10 - Update Memory Bank
+**Step**: Step 11 - Git Completion
 **Status**: COMPLETE
 **Completed**: 2026-05-16
 
-### Completed Steps
+### Completed Steps (Phase 1)
 - Architecture Design Creative: COMPLETE (2026-05-16)
 - Step 0.5 Git Setup: COMPLETE (2026-05-16) — Worktree .claude-worktrees/FEAT-001 created, branch feature/FEAT-001-project-foundation
 - Step 0.6 Phase Gate: COMPLETE (2026-05-16) — All checks passed
@@ -443,6 +449,19 @@ The following 9 decisions are **blocking** for implementation — they MUST be r
 - Step 8 Code Reviewer: COMPLETE (2026-05-16) — APPROVED WITH NOTES; 4 recommended changes applied; 2 security upgrades deferred to projectbrief
 - Step 9 Documentation: COMPLETE (2026-05-16) — techContext.md updated (final tech choices), systemPatterns.md updated (3 new patterns), JSDoc added to env.ts/app.ts/index.ts
 - Step 10 Update Memory Bank: COMPLETE (2026-05-16) — Phase 1 marked complete in roadmap, progress.md updated, tasks.md updated
+
+### Completed Steps (Phase 2)
+- Step 0.5 Git Setup: COMPLETE (2026-05-16) — Worktree verified, on branch feature/FEAT-001-project-foundation
+- Step 0.6 Phase Gate: COMPLETE (2026-05-16) — Phase 2 confirmed next unchecked phase
+- Step 1 Read Task Context: COMPLETE (2026-05-16) — Phase 2: Health check vertical slice (Phase 2 of 7, Level 4)
+- Step 2 Load Context: COMPLETE (2026-05-16) — Level 4 rules loaded, creative decisions read
+- Step 3 Test Writer: COMPLETE (2026-05-16) — 5 tests in health.test.ts written (TDD first)
+- Step 4 Coding Agent: COMPLETE (2026-05-16) — 6 files created/updated: HealthRepository, HealthService, HealthController, routes/health.ts, app.ts, vitest.config.ts, setup.ts, tsconfig.eslint.json
+- Step 5/6 Test Batching/Execution: COMPLETE (2026-05-16) — 5/5 tests pass
+- Step 7 Integration Verification: COMPLETE (2026-05-16) — tests PASS, typecheck PASS, lint PASS, build PASS
+- Step 8 Code Reviewer: COMPLETE (2026-05-16) — APPROVED WITH NOTES; REC-1 through REC-4 applied (async/await, config module, safe error response, setup.ts)
+- Step 9 Documentation: COMPLETE (2026-05-16) — No new library choices; Phase 7 will fill systemPatterns Testing Patterns
+- Step 10 Update Memory Bank: COMPLETE (2026-05-16) — Phase 2 marked complete, progress.md updated, tasks.md updated
 
 ### Sub-Agents
 - Git Setup Agent: COMPLETE, Agent ID: ae59a1d1465d1f9e2
