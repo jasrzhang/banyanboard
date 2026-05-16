@@ -1,33 +1,47 @@
 /**
  * Server Entry Point
  *
- * Loads configuration, creates the Express app, and starts the HTTP server.
- * Handles graceful shutdown on SIGTERM (container stop) and SIGINT (Ctrl+C).
+ * Loads configuration, verifies DB connectivity, creates the Express app,
+ * and starts the HTTP server. Handles graceful shutdown on SIGTERM / SIGINT.
  *
  * Exit behavior:
- *   - ConfigurationError: Process exits with code 1 (before server starts)
- *   - SIGTERM/SIGINT: Server closes cleanly, process exits with code 0
+ *   - ConfigurationError or DB unreachable: Process exits with code 1 (before server starts)
+ *   - SIGTERM/SIGINT: Server closes, pool drains, process exits with code 0
  */
 
 import { config } from './config/env.js';
 import { createApp } from './app.js';
+import { checkDatabaseConnection, closePool } from './config/db.js';
 
-const app = createApp();
+async function start(): Promise<void> {
+  await checkDatabaseConnection().catch((err: unknown) => {
+    // eslint-disable-next-line no-console
+    console.error('Database connectivity check failed:', err);
+    process.exit(1);
+  });
 
-const server = app.listen(config.port, () => {
-  // TODO: Replace console.log with pino logger when Phase 5 wires observability
-  // eslint-disable-next-line no-console
-  console.log(`Server listening on port ${config.port}`);
-});
+  const app = createApp();
 
-/**
- * Graceful shutdown handler.
- * Called on SIGTERM (container orchestration) or SIGINT (Ctrl+C).
- * Closes the HTTP server and exits the process.
- */
-function gracefulShutdown(): void {
-  server.close(() => process.exit(0));
+  const server = app.listen(config.port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`Server listening on port ${config.port}`);
+  });
+
+  let shuttingDown = false;
+  function gracefulShutdown(): void {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    server.close(() => {
+      void closePool().finally(() => process.exit(0));
+    });
+  }
+
+  process.on('SIGTERM', gracefulShutdown);
+  process.on('SIGINT', gracefulShutdown);
 }
 
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
+start().catch((err: unknown) => {
+  // eslint-disable-next-line no-console
+  console.error('Unexpected startup error:', err);
+  process.exit(1);
+});

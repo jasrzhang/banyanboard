@@ -1,7 +1,6 @@
-// Ensure DATABASE_URL is set before config/env.ts is loaded.
-// Override by setting TEST_DATABASE_URL in your environment.
-// Phase 4 will point this at the real compose Postgres via TEST_DATABASE_URL or DATABASE_URL.
+// Sets DATABASE_URL before any test module loads so config/env.ts doesn't throw.
+// Default matches docker-compose.yml defaults; override via TEST_DATABASE_URL for CI.
 if (!process.env['DATABASE_URL']) {
   process.env['DATABASE_URL'] =
-    process.env['TEST_DATABASE_URL'] ?? 'postgres://test:test@localhost:5432/test';
+    process.env['TEST_DATABASE_URL'] ?? 'postgres://banyan:changeme@localhost:5432/banyanboard';
 }

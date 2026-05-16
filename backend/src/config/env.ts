@@ -84,6 +84,7 @@ export const config = Object.freeze({
   pg: {
     poolMax: optionalIntEnv('PG_POOL_MAX', 10),
     poolIdleTimeoutMs: optionalIntEnv('PG_POOL_IDLE_TIMEOUT_MS', 30000),
+    connectionTimeoutMs: optionalIntEnv('PG_CONNECTION_TIMEOUT_MS', 10000),
   },
 });
 
