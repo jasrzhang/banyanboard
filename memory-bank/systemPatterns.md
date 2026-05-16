@@ -102,6 +102,19 @@ JSON response → React renders columns and cards
 - **Implementation**: Service classes called by controllers; no Express req/res in services
 - **Trade-offs**: Extra indirection for simple CRUD; pays off as logic grows
 
+### Observability Pattern — Structured Logging with Request Correlation
+
+- **Problem**: Production bugs require trace context across log lines; `console.log` is unsearchable in JSON log aggregators
+- **Implementation** (wired in Phase 5):
+  - `src/types/logger.ts` — `Logger` interface with OTel-shaped API (`trace/debug/info/warn/error/fatal` + `child()` + `withTraceContext()`)
+  - `src/config/logger.ts` — `createLogger()` factory wrapping pino v9; exports `rootLogger` singleton
+  - `src/middleware/requestContext.ts` — parses W3C `traceparent` header or generates `traceId`/`spanId` via `randomBytes`; attaches `req.logger` (child of rootLogger) and `req.traceContext`; echoes `traceparent` in response headers
+  - `src/middleware/requestLogger.ts` — emits one access log per response with method, path, statusCode, durationMs, traceId
+  - `src/middleware/errorHandler.ts` — Express 4-arg error handler; logs unhandled errors with route and traceId; returns JSON `{ error: { message, traceId } }`
+- **Configuration**: `LOG_LEVEL`, `LOG_FORMAT` (json/text), `LOG_OUTPUT`, `LOG_REDACT_PATTERNS` env vars; pino-pretty for text in dev
+- **Trade-offs**: pino is synchronous to a custom stream (testable); `Logger` interface keeps OTel SDK wiring mechanical in future
+- **Key constraint**: `no-console: error` ESLint rule forces all production logging through the Logger interface
+
 ## Integration Patterns
 
 [To be documented as integrations are built — no external integrations in MVP]

@@ -185,21 +185,28 @@ After `/banyan-c4` runs, this section will contain pointers to the Container-lev
 
 ### Logging Configuration
 
-The backend uses **pino v9** for structured JSON logging (declared in Phase 1, wired in Phase 5).
+The backend uses **pino v9** for structured JSON logging, fully wired in Phase 5.
 
 **Environment Variables:**
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `LOG_LEVEL` | `info` | Log verbosity (trace, debug, info, warn, error, fatal) |
-| `LOG_FORMAT` | `json` | Output format (json or text) |
-| `LOG_OUTPUT` | `stdout` | Destination (stdout, file, or both) |
-| `LOG_REDACT_PATTERNS` | `password,secret,token,apiKey,authorization` | Comma-separated patterns to redact from logs |
+| `LOG_FORMAT` | `json` | Output format (json for prod, text for dev via pino-pretty) |
+| `LOG_OUTPUT` | `stdout` | Destination (stdout only in MVP) |
+| `LOG_REDACT_PATTERNS` | `password,secret,token,apiKey,authorization` | Comma-separated fields to redact with `[Redacted]` |
 
-**Pattern:** Structured JSON format with service name, version, and log level.
+**Key files:**
+- `src/types/logger.ts` — `Logger` interface (OTel-compatible shape)
+- `src/config/logger.ts` — `createLogger()` factory + `rootLogger` singleton
+- `src/middleware/requestContext.ts` — W3C traceparent parsing + correlation ID generation
+- `src/middleware/requestLogger.ts` — per-request access logs
+- `src/middleware/errorHandler.ts` — centralized error handler
 
-### Distributed Tracing (Future)
+**Pattern:** Every request gets a `traceId`/`spanId` (from `traceparent` header or generated). All log lines in request context include these fields. Every access is logged with method, path, statusCode, and durationMs.
 
-Phase 5+ will wire OpenTelemetry SDK with W3C Trace Context propagation for distributed tracing across services. Configuration via `OTEL_*` environment variables (see `.env.example`).
+### Distributed Tracing (Deferred to post-MVP)
+
+Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. Full OpenTelemetry SDK wiring (collector, exporters, distributed spans) is deferred to a dedicated future task — the `Logger` interface is OTel-shaped so the migration will be mechanical.
 
 ## Architecture Principles
 
