@@ -15,7 +15,6 @@ export default tseslint.config(
       },
     },
     plugins: {
-      // Phase 6 will add no-restricted-imports layering rules (controllers/ cannot import pg or repositories/)
       import: importPlugin,
     },
     rules: {
@@ -28,6 +27,58 @@ export default tseslint.config(
         caughtErrorsIgnorePattern: '^_',
       }],
       'no-console': 'error',
+    },
+  },
+  // Layering enforcement: controllers may not import the DB layer
+  {
+    files: ['src/controllers/**/*.ts'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        paths: [
+          {
+            name: 'pg',
+            message: 'Controllers may not import database drivers. Delegate to a Service which calls a Repository.',
+          },
+          {
+            name: '@prisma/client',
+            message: 'Controllers may not import ORM clients. Delegate to a Service which calls a Repository.',
+          },
+          {
+            name: 'kysely',
+            message: 'Controllers may not import query builders. Delegate to a Service which calls a Repository.',
+          },
+        ],
+        patterns: [
+          {
+            group: ['**/repositories/**'],
+            message: 'Controllers may not import from repositories. Call a Service instead.',
+          },
+          {
+            group: ['**/config/db*'],
+            message: 'Controllers may not import the DB pool. Call a Service instead.',
+          },
+        ],
+      }],
+    },
+  },
+  // Layering enforcement: services may not import the DB pool directly
+  {
+    files: ['src/services/**/*.ts'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        paths: [
+          {
+            name: 'pg',
+            message: 'Services may not import pg directly. Delegate to a Repository.',
+          },
+        ],
+        patterns: [
+          {
+            group: ['**/config/db*'],
+            message: 'Services may not import the DB pool. Use a Repository.',
+          },
+        ],
+      }],
     },
   },
   {
