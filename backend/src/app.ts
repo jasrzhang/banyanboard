@@ -1,4 +1,5 @@
-import express, { type Application } from 'express';
+import express, { type Application, type Request, type Response } from 'express';
+import { healthRouter } from './routes/health.js';
 
 /**
  * Express App Factory
@@ -9,13 +10,14 @@ import express, { type Application } from 'express';
  *   - Dependency injection of middleware/config (future phases)
  *   - Clear separation between app setup and server startup
  *
- * Currently sets up JSON request parsing; route handlers added in Phase 2.
- *
  * @returns Configured Express application ready to listen
  */
 export function createApp(): Application {
   const app = express();
   app.use(express.json());
-  // Routes will be registered in Phase 2: POST /api/boards, GET /api/boards/:id, etc.
+  app.use('/health', healthRouter);
+  app.use((_req: Request, res: Response) => {
+    res.status(404).json({ error: 'Not Found' });
+  });
   return app;
 }
