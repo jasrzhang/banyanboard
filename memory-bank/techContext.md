@@ -11,13 +11,13 @@ frontend/
 - Path: frontend/
 - Language: TypeScript (React)
 - Test Directory: frontend/src/__tests__
-- Test Framework: Vitest (TBD)
+- Test Framework: Vitest (TBD — frontend not yet built)
 
 backend/
 - Path: backend/
 - Language: TypeScript (Node.js / Express)
 - Test Directory: backend/src/__tests__
-- Test Framework: Jest or Vitest (TBD)
+- Test Framework: Vitest v2
 
 db/
 - Path: db/
@@ -56,7 +56,7 @@ docker compose down -v
 # Install dependencies
 npm install --prefix backend
 
-# Run in dev mode (ts-node-dev or tsx watch)
+# Run in dev mode (tsx watch with hot reload)
 npm run dev --prefix backend
 
 # Build
@@ -64,6 +64,15 @@ npm run build --prefix backend
 
 # Run tests
 npm test --prefix backend
+
+# Type checking
+npm run typecheck --prefix backend
+
+# Linting
+npm run lint --prefix backend
+
+# Database migrations
+npm run migrate --prefix backend
 ```
 
 ### Frontend
@@ -125,8 +134,8 @@ npm run typecheck --prefix frontend
 ### Data Layer
 
 - PostgreSQL 15 — relational database for boards, columns, cards, users
-- node-postgres (`pg`) or Prisma — database client (TBD during setup)
-- SQL migrations — schema versioning (migration tool TBD: Flyway, node-pg-migrate, or Prisma migrate)
+- **node-postgres (`pg`) v8** — database client; raw SQL with typed query results
+- **node-pg-migrate v7** — schema versioning and migrations (CLI: `npm run migrate --prefix backend`)
 
 ### API & Communication
 
@@ -141,9 +150,11 @@ npm run typecheck --prefix frontend
 ### Development Tools
 
 - Vite — frontend build tool and dev server
-- ts-node-dev or tsx — backend TypeScript hot-reload in development
-- ESLint + Prettier — linting and formatting (TBD configuration)
-- Jest or Vitest — unit and integration testing (TBD per component)
+- **tsx** — backend TypeScript execution and hot-reload in development (via `npm run dev`)
+- **ESLint 9** — flat config format (`eslint.config.js`), with TypeScript and import plugins
+- **Prettier 3** — code formatting (config: `.prettierrc.json`)
+- **Vitest v2** — backend unit and integration testing (frontend TBD)
+- **TypeScript 5** — strict mode with `noUncheckedIndexedAccess` and `noImplicitOverride`
 
 ### External Services
 
@@ -171,7 +182,51 @@ After `/banyan-c4` runs, this section will contain pointers to the Container-lev
 - **No premature abstractions** — don't abstract until there are 3+ concrete cases
 - **12-Factor config** — all environment-specific values via environment variables
 
+## Observability
+
+### Logging Configuration
+
+The backend uses **pino v9** for structured JSON logging, fully wired in Phase 5.
+
+**Environment Variables:**
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `LOG_LEVEL` | `info` | Log verbosity (trace, debug, info, warn, error, fatal) |
+| `LOG_FORMAT` | `json` | Output format (json for prod, text for dev via pino-pretty) |
+| `LOG_OUTPUT` | `stdout` | Destination (stdout only in MVP) |
+| `LOG_REDACT_PATTERNS` | `password,secret,token,apiKey,authorization` | Comma-separated fields to redact with `[Redacted]` |
+
+**Key files:**
+- `src/types/logger.ts` — `Logger` interface (OTel-compatible shape)
+- `src/config/logger.ts` — `createLogger()` factory + `rootLogger` singleton
+- `src/middleware/requestContext.ts` — W3C traceparent parsing + correlation ID generation
+- `src/middleware/requestLogger.ts` — per-request access logs
+- `src/middleware/errorHandler.ts` — centralized error handler
+
+**Pattern:** Every request gets a `traceId`/`spanId` (from `traceparent` header or generated). All log lines in request context include these fields. Every access is logged with method, path, statusCode, and durationMs.
+
+### Distributed Tracing (Deferred to post-MVP)
+
+Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. Full OpenTelemetry SDK wiring (collector, exporters, distributed spans) is deferred to a dedicated future task — the `Logger` interface is OTel-shaped so the migration will be mechanical.
+
 ## Recent Technology Changes
+
+### 2026-05-16 — Phase 1: TypeScript backend scaffolding + ESLint
+
+- **What Changed**: Backend tooling finalized and configured
+  - **Test runner**: Vitest v2 (backend; frontend TBD)
+  - **Logger**: pino v9 (declared; wired in Phase 5)
+  - **DB client**: pg v8 (raw node-postgres; wired in Phase 4)
+  - **Migrations**: node-pg-migrate v7 (declared; wired in Phase 4)
+  - **ESLint**: v9 flat config format, TypeScript strict mode
+  - **Module system**: NodeNext ESM (`"type": "module"`)
+  - **Hot reload**: tsx watch (dev mode)
+- **Reason**: 12-Factor config with fail-fast validation, strict TypeScript for type safety, ESLint v9 for modern JS tooling
+- **Impact**: All backend code follows strict TypeScript, structured logging, and fail-fast configuration validation
+- **Enforced**:
+  - No `console.log()` in production code (ESLint error)
+  - No hardcoded config values (must use `config` object from `src/config/env.ts`)
+  - DATABASE_URL required at startup (crash if missing)
 
 ### 2026-05-16 — Initial stack defined
 
@@ -183,6 +238,5 @@ After `/banyan-c4` runs, this section will contain pointers to the Container-lev
 
 ## Notes
 
-- Specific library choices (DnD library, ORM, test runner) TBD during first implementation task — record the decision here when made
-- Docker Compose service names: `frontend`, `backend`, `db` (or similar — finalize in docker-compose.yml)
+- Docker Compose service names: `frontend` (TBD), `backend`, `db`
 - Keep Development Commands updated as build scripts are added to package.json files
