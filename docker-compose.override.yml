@@ -1,0 +1,11 @@
+services:
+  backend:
+    build:
+      target: deps
+    working_dir: /app
+    command: npx tsx watch src/index.ts
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
