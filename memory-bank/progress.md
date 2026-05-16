@@ -20,4 +20,13 @@
 
 ---
 
+## Task Archive: TASK-001
+
+**Task**: Project Foundation
+**Status**: ✅ ARCHIVED
+**Date**: 2026-05-16
+**Archive**: `memory-bank/archive/archive-TASK-001.md`
+
+---
+
 *Updated by `/banyan-archive` after each task completion.*

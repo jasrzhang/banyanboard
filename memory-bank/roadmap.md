@@ -29,10 +29,11 @@
 
 ### FEAT-001: Project Foundation
 - **Version**: v0.1.0
-- **Status**: planned
+- **Status**: complete
 - **Priority**: high
 - **Complexity**: Level 4
 - **Description**: Set up the complete project skeleton for BanyanBoard. Includes: Express API with TypeScript (strict mode), Docker Compose service for PostgreSQL, health check endpoint (`GET /health`) with integration tests, and a clean layered project structure (controllers → services → repositories). This is the foundation every future feature depends on.
-- **Linked Tasks**: TASK-001 (planned)
-- **Branch**: feature/FEAT-001-project-foundation
+- **Linked Tasks**: TASK-001 (complete)
+- **Branch**: feature/FEAT-001-project-foundation (merged 2026-05-16)
 - **Created**: 2026-05-16
+- **Completed**: 2026-05-16
