@@ -1,30 +1,21 @@
-/**
- * Server Entry Point
- *
- * Loads configuration, verifies DB connectivity, creates the Express app,
- * and starts the HTTP server. Handles graceful shutdown on SIGTERM / SIGINT.
- *
- * Exit behavior:
- *   - ConfigurationError or DB unreachable: Process exits with code 1 (before server starts)
- *   - SIGTERM/SIGINT: Server closes, pool drains, process exits with code 0
- */
-
 import { config } from './config/env.js';
 import { createApp } from './app.js';
 import { checkDatabaseConnection, closePool } from './config/db.js';
+import { rootLogger } from './config/logger.js';
 
 async function start(): Promise<void> {
   await checkDatabaseConnection().catch((err: unknown) => {
-    // eslint-disable-next-line no-console
-    console.error('Database connectivity check failed:', err);
+    rootLogger.error(
+      'Database connectivity check failed',
+      err instanceof Error ? err : new Error(String(err)),
+    );
     process.exit(1);
   });
 
   const app = createApp();
 
   const server = app.listen(config.port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`Server listening on port ${config.port}`);
+    rootLogger.info('Server started', { port: config.port });
   });
 
   let shuttingDown = false;
@@ -41,7 +32,9 @@ async function start(): Promise<void> {
 }
 
 start().catch((err: unknown) => {
-  // eslint-disable-next-line no-console
-  console.error('Unexpected startup error:', err);
+  rootLogger.error(
+    'Unexpected startup error',
+    err instanceof Error ? err : new Error(String(err)),
+  );
   process.exit(1);
 });
