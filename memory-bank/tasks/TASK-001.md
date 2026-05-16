@@ -409,11 +409,13 @@ The following 9 decisions are **blocking** for implementation — they MUST be r
   - `backend/src/__tests__/layering.test.ts` — 2 structural tests: (1) no controller imports `pg`; (2) no controller contains raw SQL keywords — safety net for template-literal SQL that lint regex can't catch
   - *Verified by: `npm run lint` exits 0, `npm test` exits 0 (15 non-DB tests pass), typecheck PASS, build PASS*
 
-- [ ] **Phase 7: Documentation + memory-bank updates**
-  - Root `README.md` — prerequisites, 3-command quickstart, architecture diagram (ASCII), test commands, layering rules, next-step roadmap link
-  - Update `memory-bank/techContext.md` — record final library choices (ORM, migration, test framework, logger)
-  - Update `memory-bank/systemPatterns.md` Testing Patterns section (currently "[To be defined]")
-  - *Verified by: human review; techContext.md and systemPatterns.md no longer have "[To be defined]" placeholders*
+- [x] **Phase 7: Documentation + memory-bank updates** ✓
+
+  **Completed**: 2026-05-16 | **Tests**: 0 (documentation phase) | **Code Review**: N/A
+  - `README.md` — prerequisites (Docker, Node 20 LTS), 3-command quickstart, ASCII architecture diagram, test commands, layering rules, next-step roadmap link
+  - `memory-bank/techContext.md` (feature branch) — updated with final library choices: Vitest v2, pg v8, node-pg-migrate v7, tsx, ESLint 9, Prettier 3; added Observability section and Recent Technology Changes
+  - `memory-bank/systemPatterns.md` (feature branch) — added App Factory, 12-Factor Config, Graceful Shutdown, and Observability patterns; filled in Testing Patterns section (no more "[To be defined]" placeholders)
+  - *Verified by: typecheck PASS, lint PASS, 12/15 tests pass (3 DB tests need Docker — unchanged from Phase 6)*
 
 ### Risk Assessment
 
@@ -434,8 +436,8 @@ The following 9 decisions are **blocking** for implementation — they MUST be r
 ## Execution State
 
 **Build Status**: IDLE
-**Last Completed**: Phase 6: Layering enforcement
-**Phase Number**: 6 of 7 complete
+**Last Completed**: Phase 7: Documentation + memory-bank updates
+**Phase Number**: 7 of 7 complete
 **Is Multi-Phase**: YES
 **Can Resume**: NO
 
