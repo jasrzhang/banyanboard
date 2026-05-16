@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Session logs (generated, may contain sensitive info)
+.agent-logs/sessions/
+.claude-logs/
+
+# Auth tokens (sensitive — never commit)
+.auth/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
