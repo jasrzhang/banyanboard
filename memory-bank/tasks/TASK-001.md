@@ -363,16 +363,16 @@ The following 9 decisions are **blocking** for implementation — they MUST be r
   - Integration tests in `backend/src/__tests__/health.test.ts` — 5/5 tests pass
   - *Verified by: `npm test --prefix backend` exits 0, typecheck PASS, lint PASS, build PASS*
 
-- [ ] **Phase 3: Docker Compose + PostgreSQL service**
-  - `Dockerfile` for backend (multi-stage: builder stage compiles TS, runtime stage runs dist/)
-  - `docker-compose.yml` with `db` (postgres:15) and `backend` services
-  - PostgreSQL healthcheck: `pg_isready -U $POSTGRES_USER -d $POSTGRES_DB`
-  - Backend healthcheck: `curl -f http://localhost:3001/health || exit 1`
-  - `backend` service: `depends_on: db: condition: service_healthy`
-  - Named volume `pgdata` for PostgreSQL persistence
-  - `env_file: backend/.env` in compose — no plaintext credentials in compose file
-  - *Decisions required from creative: Dockerfile strategy, final service names*
-  - *Verified by: `docker compose up -d`, `docker compose ps` all healthy, `curl /health` returns 200*
+- [x] **Phase 3: Docker Compose + PostgreSQL service** ✓
+
+  **Completed**: 2026-05-16 | **Tests**: 0 (infrastructure — verified by tsc + lint + regression) | **Code Review**: APPROVED WITH NOTES
+  - `backend/Dockerfile` — multi-stage: deps → build → runtime; USER node; EXPOSE 3001; wget healthcheck on /health/live
+  - `backend/.dockerignore` — excludes node_modules, dist, .env.*, coverage, .git, src/__tests__, vitest.config.ts
+  - `docker-compose.yml` — db (postgres:15-alpine) + backend services; pg_isready healthcheck ($$-style); depends_on service_healthy; named volume pgdata; env_file optional
+  - `docker-compose.override.yml` — dev hot-reload: targets deps stage, bind-mounts ./backend, tsx watch, working_dir /app
+  - `.env.example` (root) — POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB with comments
+  - *Verified by: 5/5 existing tests pass (regression), typecheck PASS, lint PASS, build PASS*
+  - *Manual probe required: docker compose up -d → docker compose ps (all healthy) → curl /health/live → 200*
 
 - [ ] **Phase 4: PostgreSQL client + connectivity integration test**
   - Install chosen DB client (ORM TBD from creative)
@@ -426,8 +426,8 @@ The following 9 decisions are **blocking** for implementation — they MUST be r
 ## Execution State
 
 **Build Status**: IDLE
-**Last Completed**: Phase 2: Health check vertical slice
-**Phase Number**: 2 of 7 complete
+**Last Completed**: Phase 3: Docker Compose + PostgreSQL service
+**Phase Number**: 3 of 7 complete
 **Is Multi-Phase**: YES
 **Can Resume**: NO
 
