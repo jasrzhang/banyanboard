@@ -8,6 +8,9 @@ node_modules/
 # Auth tokens (sensitive — never commit)
 .auth/
 
+# Git worktrees (local development isolation)
+.claude-worktrees/
+
 # Environment files
 .env
 .env.*

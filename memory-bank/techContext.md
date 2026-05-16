@@ -56,7 +56,7 @@ docker compose down -v
 # Install dependencies
 npm install --prefix backend
 
-# Run in dev mode (ts-node-dev or tsx watch)
+# Run in dev mode (tsx watch with hot reload)
 npm run dev --prefix backend
 
 # Build
@@ -64,6 +64,15 @@ npm run build --prefix backend
 
 # Run tests
 npm test --prefix backend
+
+# Type checking
+npm run typecheck --prefix backend
+
+# Linting
+npm run lint --prefix backend
+
+# Database migrations
+npm run migrate --prefix backend
 ```
 
 ### Frontend
@@ -98,13 +107,19 @@ npm run seed --prefix backend
 # Lint backend
 npm run lint --prefix backend
 
-# Lint frontend
-npm run lint --prefix frontend
+# Lint and fix backend
+npm run lint:fix --prefix backend
 
 # Type check backend
 npm run typecheck --prefix backend
 
-# Type check frontend
+# Format backend code
+npm run format --prefix backend
+
+# Lint frontend (TBD)
+npm run lint --prefix frontend
+
+# Type check frontend (TBD)
 npm run typecheck --prefix frontend
 ```
 
@@ -125,8 +140,8 @@ npm run typecheck --prefix frontend
 ### Data Layer
 
 - PostgreSQL 15 — relational database for boards, columns, cards, users
-- node-postgres (`pg`) or Prisma — database client (TBD during setup)
-- SQL migrations — schema versioning (migration tool TBD: Flyway, node-pg-migrate, or Prisma migrate)
+- **node-postgres (`pg`) v8** — database client; raw SQL with typed query results
+- **node-pg-migrate v7** — schema versioning and migrations (CLI: `npm run migrate --prefix backend`)
 
 ### API & Communication
 
@@ -141,9 +156,11 @@ npm run typecheck --prefix frontend
 ### Development Tools
 
 - Vite — frontend build tool and dev server
-- ts-node-dev or tsx — backend TypeScript hot-reload in development
-- ESLint + Prettier — linting and formatting (TBD configuration)
-- Jest or Vitest — unit and integration testing (TBD per component)
+- **tsx** — backend TypeScript execution and hot-reload in development (via `npm run dev`)
+- **ESLint 9** — flat config format (`eslint.config.js`), with TypeScript and import plugins
+- **Prettier 3** — code formatting (config: `.prettierrc.json`)
+- **Vitest 2** — backend unit and integration testing (frontend TBD)
+- **TypeScript 5** — strict mode with `noUncheckedIndexedAccess` and `noImplicitOverride`
 
 ### External Services
 
@@ -164,6 +181,26 @@ After `/banyan-c4` runs, this section will contain pointers to the Container-lev
 
 <!-- AUTO-MANAGED: c4-references-end -->
 
+## Observability
+
+### Logging Configuration
+
+The backend uses **pino v9** for structured JSON logging (declared in Phase 1, wired in Phase 5).
+
+**Environment Variables:**
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `LOG_LEVEL` | `info` | Log verbosity (trace, debug, info, warn, error, fatal) |
+| `LOG_FORMAT` | `json` | Output format (json or text) |
+| `LOG_OUTPUT` | `stdout` | Destination (stdout, file, or both) |
+| `LOG_REDACT_PATTERNS` | `password,secret,token,apiKey,authorization` | Comma-separated patterns to redact from logs |
+
+**Pattern:** Structured JSON format with service name, version, and log level.
+
+### Distributed Tracing (Future)
+
+Phase 5+ will wire OpenTelemetry SDK with W3C Trace Context propagation for distributed tracing across services. Configuration via `OTEL_*` environment variables (see `.env.example`).
+
 ## Architecture Principles
 
 - **Clean architecture** — controllers → services → repositories; no business logic in route handlers
@@ -172,6 +209,23 @@ After `/banyan-c4` runs, this section will contain pointers to the Container-lev
 - **12-Factor config** — all environment-specific values via environment variables
 
 ## Recent Technology Changes
+
+### 2026-05-16 — Phase 1: TypeScript backend scaffolding + ESLint
+
+- **What Changed**: Backend tooling finalized and configured
+  - **Test runner**: Vitest v2 (backend, frontend TBD)
+  - **Logger**: pino v9 (declared; wired in Phase 5)
+  - **DB client**: pg v8 (raw node-postgres; wired in Phase 4)
+  - **Migrations**: node-pg-migrate v7 (declared; wired in Phase 4)
+  - **ESLint**: v9 flat config format, TypeScript strict mode
+  - **Module system**: NodeNext ESM (`"type": "module"`)
+  - **Hot reload**: tsx watch (dev mode)
+- **Reason**: 12-Factor config with fail-fast validation, strict TypeScript for type safety, ESLint v9 for modern JS tooling
+- **Impact**: All backend code follows strict TypeScript, structured logging (when Phase 5 completes), and fail-fast configuration validation
+- **Enforced**:
+  - No `console.log()` in production code (ESLint error)
+  - No hardcoded config values (must use `config` object from `src/config/env.ts`)
+  - DATABASE_URL required at startup (crash if missing)
 
 ### 2026-05-16 — Initial stack defined
 

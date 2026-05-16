@@ -73,7 +73,13 @@
       "Edit(*.toml)",
       "WebSearch",
       "Skill(banyan-memory-bank:banyan-creative)",
-      "Bash(mkdir C:\\\\git\\\\banyanboard\\\\memory-bank\\\\creative *)"
+      "Bash(mkdir C:\\\\git\\\\banyanboard\\\\memory-bank\\\\creative *)",
+      "Bash(New-Item -ItemType File -Path \"C:\\\\git\\\\banyanboard\\\\.claude-worktrees\\\\FEAT-001\\\\backend\\\\.env.example\" -Force)",
+      "Bash(Out-Null)",
+      "Bash(Write-Host \"created\")",
+      "Bash(powershell.exe *)",
+      "Bash(npm audit *)",
+      "Bash(npm list *)"
     ],
     "deny": [
       "Bash(rm -rf *)",

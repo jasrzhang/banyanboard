@@ -9,7 +9,8 @@ This file documents the architectural patterns, design patterns, and system stru
 | Clean Architecture | Controllers → Services → Repositories. No business logic in route handlers. No database calls in controllers. |
 | Simplicity over Cleverness | Prefer explicit, readable code. Avoid patterns that require explanation to understand. |
 | No Premature Abstractions | Don't create a shared abstraction until there are 3+ concrete implementations. Three similar functions are better than one over-generalized helper. |
-| 12-Factor Config | All environment-specific values (DB URL, port, JWT secret) via environment variables. No hardcoded config in source. |
+| 12-Factor Config | All environment-specific values (DB URL, port, JWT secret) via environment variables. No hardcoded config in source. Fail fast at startup if required values are missing. |
+| Graceful Shutdown | All services handle SIGTERM and SIGINT to shut down cleanly (critical for container orchestration). Connections close, in-flight requests complete, process exits. |
 | Optimistic UI | Card drag-and-drop updates the UI immediately, then confirms with the server. Rollback on error. |
 
 ## System Architecture
@@ -64,6 +65,30 @@ JSON response → React renders columns and cards
 ```
 
 ## Design Patterns Used
+
+### App Factory Pattern (Express) — Configuration & Testing
+
+- **Problem**: Express app needs to be testable; configuration must be injectable
+- **Implementation**: `createApp()` function in `src/app.ts` returns a configured Express app; called by server entry point in `src/index.ts`
+- **Trade-offs**: Minimal boilerplate; enables easy HTTP testing via supertest
+- **Example**: `backend/src/app.ts`
+
+### 12-Factor Configuration Pattern — Environment-Driven Config
+
+- **Problem**: Config differs by environment (dev, test, production); must fail fast on missing required values
+- **Implementation**: `src/config/env.ts` exports a frozen `config` object with:
+  - `requireEnv(key)` — throws ConfigurationError if missing
+  - `optionalEnv(key, default)` — returns env var or sensible default
+  - `optionalIntEnv(key, default)` — parses and validates integer env vars
+- **Trade-offs**: Small module; prevents hardcoded values anywhere in codebase
+- **Example**: `backend/src/config/env.ts` (DATABASE_URL required at startup)
+
+### Graceful Shutdown Pattern — Process Management
+
+- **Problem**: Server must close cleanly on SIGTERM/SIGINT (container orchestration, rolling deployments)
+- **Implementation**: Register handlers for SIGTERM and SIGINT that call `server.close()` and exit
+- **Trade-offs**: Simple pattern; prevents connection leaks during shutdown
+- **Example**: `backend/src/index.ts`
 
 ### Repository Pattern — Data Access
 
