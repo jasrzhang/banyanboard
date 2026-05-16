@@ -374,14 +374,18 @@ The following 9 decisions are **blocking** for implementation — they MUST be r
   - *Verified by: 5/5 existing tests pass (regression), typecheck PASS, lint PASS, build PASS*
   - *Manual probe required: docker compose up -d → docker compose ps (all healthy) → curl /health/live → 200*
 
-- [ ] **Phase 4: PostgreSQL client + connectivity integration test**
-  - Install chosen DB client (ORM TBD from creative)
-  - `src/config/db.ts` — creates and exports connection pool, reads `DATABASE_URL` or discrete env vars
-  - Startup connectivity check with fail-fast error on missing env vars
-  - Integration tests in `backend/src/__tests__/db.test.ts` (4 tests per Test Strategy)
-  - `migrate` script stub (even if no tables yet — framework in place for future features)
-  - *Decisions required from creative: ORM/DB client choice, migration tool*
-  - *Verified by: DB integration test passes against real PostgreSQL*
+- [x] **Phase 4: PostgreSQL client + connectivity integration test** ✓
+
+  **Completed**: 2026-05-16 | **Tests**: 4 new (9 total, all pass) | **Code Review**: APPROVED WITH NOTES
+  - `backend/src/config/db.ts` — pg Pool singleton (poolMax, idleTimeout, connectionTimeout from env), exports `pool`, `checkDatabaseConnection()`, `closePool()`
+  - `backend/src/config/env.ts` — added `PG_CONNECTION_TIMEOUT_MS` config (default 10s; REC-2 applied)
+  - `backend/src/index.ts` — startup connectivity check with fail-fast; double-shutdown guard; `closePool()` in graceful shutdown (REC-3 applied)
+  - `backend/src/__tests__/db.test.ts` — 4 integration tests: SELECT 1 returns 1, checkDatabaseConnection resolves, wrong-creds rejects, pool lifecycle clean
+  - `backend/src/__tests__/setup.ts` — default DATABASE_URL fallback updated to docker-compose credentials
+  - `backend/migrations/.gitkeep` — stub for node-pg-migrate
+  - `backend/.env.example` — added PG_CONNECTION_TIMEOUT_MS
+  - REC-1 (replace console with pino) deferred to Phase 5
+  - *Verified by: 9/9 tests pass against real Postgres, typecheck PASS, lint PASS, build PASS*
 
 - [ ] **Phase 5: Observability foundation**
   - Install chosen logger library (TBD from creative)
@@ -426,8 +430,8 @@ The following 9 decisions are **blocking** for implementation — they MUST be r
 ## Execution State
 
 **Build Status**: IDLE
-**Last Completed**: Phase 3: Docker Compose + PostgreSQL service
-**Phase Number**: 3 of 7 complete
+**Last Completed**: Phase 4: PostgreSQL client + connectivity integration test
+**Phase Number**: 4 of 7 complete
 **Is Multi-Phase**: YES
 **Can Resume**: NO
 
