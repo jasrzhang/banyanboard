@@ -9,3 +9,14 @@ services:
       - /app/node_modules
     environment:
       NODE_ENV: development
+
+  frontend:
+    build:
+      target: deps
+    working_dir: /app
+    command: npm run dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development

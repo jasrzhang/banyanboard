@@ -14,3 +14,25 @@ Chronological record of pattern extraction and consolidation events from task re
 
 ### systemPatterns.md Updates
 - None (patterns already captured in design docs during Phase 5; structural test pattern is a novel code-level practice, not an architecture pattern)
+
+---
+
+## 2026-05-18 - TASK-002 Reflection
+
+### Extracted Patterns
+- **toolchain-setup** → created `agent-rules/_learned/toolchain-setup.md` (evidence count: 1) — Vitest globals dual-config + npm `.npmrc workspaces=false`
+- **testing-patterns** → amended `agent-rules/_learned/testing-patterns.md` (evidence count: 2) — Zustand `beforeEach` reset for state isolation
+- **state-architecture** → created `agent-rules/_learned/state-architecture.md` (evidence count: 1) — Three-layer state split contract (TanStack Query / Zustand / URL params)
+
+### systemPatterns.md Updates
+- None (state-layer split is a frontend-specific architectural contract; recommended for `systemPatterns.md` Frontend section — deferred per reflection recommendation)
+
+---
+
+## 2026-05-18 - Consolidation (during TASK-002 archive)
+
+- Files before: 6, Files after: 6
+- Merged: 0 files
+- Expired: 0 bullets (0 files deleted)
+- Promoted: 0 files to medium priority
+- Pruned: 0 excess bullets
