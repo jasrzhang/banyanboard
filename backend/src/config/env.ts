@@ -86,6 +86,9 @@ export const config = Object.freeze({
     poolIdleTimeoutMs: optionalIntEnv('PG_POOL_IDLE_TIMEOUT_MS', 30000),
     connectionTimeoutMs: optionalIntEnv('PG_CONNECTION_TIMEOUT_MS', 10000),
   },
+  cards: {
+    positionGap: optionalIntEnv('CARD_POSITION_GAP', 1000),
+  },
 });
 
 export type Config = typeof config;
