@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
+import { useBoards } from '../../hooks/useBoards';
 
 interface SidebarProps {
   id?: string;
@@ -7,13 +8,9 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-const placeholderBoards = [
-  { id: 'board-1', name: 'My Board' },
-  { id: 'board-2', name: 'Project X' },
-  { id: 'board-3', name: 'Ops Board' },
-];
-
 export function Sidebar({ id, isOpen, onClose }: SidebarProps) {
+  const { data: boards, isLoading } = useBoards();
+
   const sidebarClasses = clsx(
     'bg-surface-sidebar border-r border-border flex flex-col h-full z-50 w-64',
     'fixed inset-y-0 left-0',
@@ -33,7 +30,12 @@ export function Sidebar({ id, isOpen, onClose }: SidebarProps) {
           Boards
         </p>
         <ul>
-          {placeholderBoards.map((board) => (
+          {isLoading && (
+            <li className="px-3 py-2">
+              <span className="text-sm text-text-disabled">Loading boards…</span>
+            </li>
+          )}
+          {boards?.map((board) => (
             <li key={board.id}>
               <NavLink
                 to={`/boards/${board.id}`}
@@ -51,6 +53,11 @@ export function Sidebar({ id, isOpen, onClose }: SidebarProps) {
               </NavLink>
             </li>
           ))}
+          {!isLoading && (!boards || boards.length === 0) && (
+            <li className="px-3 py-2">
+              <span className="text-sm text-text-disabled">No boards yet</span>
+            </li>
+          )}
         </ul>
       </div>
 

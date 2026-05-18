@@ -1,12 +1,10 @@
 import { useParams } from 'react-router-dom';
+import { BoardView } from '../components/board/BoardView';
 
 type RouteParams = { boardId: string };
 
 export function BoardDetailPage() {
   const { boardId } = useParams<RouteParams>();
-  return (
-    <div className="p-6">
-      <p className="text-text-secondary text-sm">Board {boardId} — coming soon</p>
-    </div>
-  );
+  if (!boardId) return null;
+  return <BoardView boardId={boardId} />;
 }
