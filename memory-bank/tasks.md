@@ -4,4 +4,4 @@
 |----|------|-------|--------|
 | TASK-001 | Project Foundation | ARCHIVE | COMPLETE | FEAT-001 |
 | TASK-002 | Frontend Foundation | ARCHIVE | COMPLETE | FEAT-002 |
-| TASK-003 | Kanban Board UI | BUILD | Phase 4/5 COMPLETE | FEAT-003 |
+| TASK-003 | Kanban Board UI | BUILD | BUILD_COMPLETE | FEAT-003 |

@@ -15,10 +15,9 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useQueryClient } from '@tanstack/react-query';
 import { useBoard } from '../../hooks/useBoard';
 import { useMoveCard } from '../../hooks/useMoveCard';
-import { createCard } from '../../api/boardsApi';
+import { useCreateCard } from '../../hooks/useCreateCard';
 import type { Board, Card } from '../../types/domain';
 import { Column } from './Column';
 import { CardTile } from '../card/CardTile';
@@ -74,9 +73,9 @@ function computeNewPosition(board: Board, draggedCardId: string, overId: string,
 
 export function BoardView({ boardId }: BoardViewProps) {
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
-  const queryClient = useQueryClient();
   const { data: board, isLoading, isError, error, refetch } = useBoard(boardId);
   const { mutate: moveCardMutation } = useMoveCard(boardId);
+  const { mutateAsync: createCardMutation } = useCreateCard(boardId);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -106,18 +105,8 @@ export function BoardView({ boardId }: BoardViewProps) {
     moveCardMutation({ cardId: draggedCardId, fromColumnId, toColumnId, position: newPosition });
   };
 
-  const handleAddCard = async (columnId: string, title: string) => {
-    const newCard = await createCard(columnId, { title });
-    queryClient.setQueryData(['board', boardId], (old: typeof board) => {
-      if (!old) return old;
-      return {
-        ...old,
-        columns: old.columns.map((col) =>
-          col.id === columnId ? { ...col, cards: [...col.cards, newCard] } : col,
-        ),
-      };
-    });
-  };
+  const handleAddCard = (columnId: string, title: string) =>
+    createCardMutation({ columnId, title });
 
   const activeCard = board && activeCardId ? findCardById(board, activeCardId) : null;
 

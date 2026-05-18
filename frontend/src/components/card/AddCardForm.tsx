@@ -40,6 +40,8 @@ export function AddCardForm({ columnId, onAdd }: AddCardFormProps) {
       await onAdd(columnId, title.trim());
       setTitle('');
       setIsOpen(false);
+    } catch {
+      // Error handled by the caller (mutation's onError shows toast); form stays open for retry
     } finally {
       setIsSubmitting(false);
     }
