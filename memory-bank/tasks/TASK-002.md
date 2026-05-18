@@ -350,10 +350,9 @@ Three-phase build for the BanyanBoard frontend foundation. Phase 1 (scaffold) is
   - **Tests**: 4/4 AppShell + 3/3 route smoke = 7 new tests (10 total)
   - **Gate**: Browser visual check at `http://localhost:5173`; all tests pass
 
-- [ ] Phase 3: State + query wiring — TanStack Query v5 `QueryClientProvider` at root, Zustand store (or Context) initial setup, `useAppStore` hook, `src/types/` domain interfaces, Docker Compose frontend service finalised
-  - **BLOCKED ON**: CE-4 (Zustand vs Context), CE-6 (types location)
+- [x] Phase 3: State + query wiring — TanStack Query v5 `QueryClientProvider` at root, Zustand store (or Context) initial setup, `useAppStore` hook, `src/types/` domain interfaces, Docker Compose frontend service finalised
   - **ACs covered**: AC-HAPPY-4, AC-HAPPY-5, AC-DOCKER-1
-  - **Tests**: 2–3 (QueryClient accessible in tree, store initialises without error)
+  - **Tests**: 3 store + 1 QueryClient = 4 new tests (14 total)
   - **Gate**: `docker compose up` brings all three services up; `http://localhost:5173` reachable; all tests pass
 
 ## Creative Phases
@@ -365,10 +364,10 @@ Three-phase build for the BanyanBoard frontend foundation. Phase 1 (scaffold) is
 
 ## Execution State
 
-**Build Status**: PHASE_COMPLETE
-**Current Build**: Phase 2: App shell layout (TASK-002) — COMPLETE
+**Build Status**: BUILD_COMPLETE
+**Current Build**: Phase 3: State + Query Wiring (TASK-002) — COMPLETE
 **Build Started**: 2026-05-18
-**Phase Number**: 2 of 3
+**Phase Number**: 3 of 3
 **Is Multi-Phase**: YES
 
 ### Current Build Step
@@ -377,20 +376,19 @@ Three-phase build for the BanyanBoard frontend foundation. Phase 1 (scaffold) is
 **Completed**: 2026-05-18
 
 ### Completed Steps
-- Phase 1: All steps COMPLETE (see history above)
-- Step 1 (Build P2): Read Task Context — Phase 2 of 3 identified (App Shell Layout)
-- Step 3 (Build P2): Test Writer — AppShell.test.tsx (4 tests), routes.test.tsx (3 tests)
-- Step 4 (Build P2): Coding Agent — useSidebar.ts, AppShell.tsx, Sidebar.tsx, BoardHeader.tsx, BoardListPage.tsx, BoardDetailPage.tsx, router/index.tsx; updated main.tsx; deleted dead App.tsx
-- Step 5–6 (Build P2): Tests — 10/10 pass (3 Phase 1 + 4 AppShell + 3 routes)
-- Step 7 (Build P2): Integration Verification — Tests 10/10 PASS, Build PASS, Lint PASS, Typecheck PASS
-- Step 8 (Build P2): Code Review — APPROVED. CE-1/CE-2/CE-3 creative decisions applied correctly; a11y attributes present; semantic tokens used; no console in production code; v7_startTransition flag not added (not supported in react-router-dom@6.26 types)
-- Step 9–10 (Build P2): Memory bank updated (tasks.md, TASK-002.md, progress.md)
-- Step 11 (Build P2): Git Completion — committed Phase 2 to feature/FEAT-002-frontend-foundation
+- Phase 1 + 2: All steps COMPLETE (see history)
+- Step 1 (Build P3): Read Task Context — Phase 3 of 3 identified (State + Query Wiring)
+- Step 3 (Build P3): Test Writer — appStore.test.ts (3 tests), queryProvider.test.tsx (1 test)
+- Step 4 (Build P3): Coding Agent — appStore.ts (Zustand + devtools), domain.ts + api.ts + index.ts (types), main.tsx (QueryClientProvider wrapper)
+- Step 5–6 (Build P3): Tests — 14/14 pass (10 Phase 1+2 + 4 new)
+- Step 7 (Build P3): Integration Verification — Tests 14/14 PASS, Build PASS, Lint PASS, Typecheck PASS
+- Step 8 (Build P3): Code Review — APPROVED. Zustand curried create syntax correct; devtools gated to DEV; types inline per CE-6; beforeEach reset in tests prevents state leakage
+- Step 9–10 (Build P3): Memory bank updated
+- Step 11 (Build P3): Git Completion — committed Phase 3 to feature/FEAT-002-frontend-foundation
 
 ### Sub-Agents
-(none — orchestrator implemented Phase 2 directly)
+(none — orchestrator implemented all phases directly)
 
 ### Resumption Notes
-**Can Resume**: YES
-**Resume From**: Phase 3 — State + Query Wiring (/banyan-build TASK-002 next invocation)
-**Notes**: Phase 2 complete. Phase 3 needs CE-4 (Zustand) and CE-6 (inline types) decisions — both RESOLVED in TASK-002-frontend-architecture.md.
+**Can Resume**: NO
+**Notes**: ALL 3 PHASES COMPLETE. Run /banyan-reflect TASK-002 next.
