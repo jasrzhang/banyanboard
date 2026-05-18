@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Local environment files (never commit secrets)
+.env.local
+.env.*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Coverage reports
+coverage/
+
+# Vitest UI
+.vitest-ui/
+
+# TypeScript build info and composite project output
+*.tsbuildinfo
+*.tsbuildinfo.*
+# Compiled JS/DTS from tsconfig.node.json composite build (build artifacts)
+vite.config.js
+vite.config.d.ts
+vitest.config.js
+vitest.config.d.ts
+tailwind.config.js
+tailwind.config.d.ts

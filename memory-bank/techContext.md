@@ -9,9 +9,11 @@ This file documents the technology stack, infrastructure, and tooling used in th
 ```
 frontend/
 - Path: frontend/
-- Language: TypeScript (React)
+- Language: TypeScript (React 18 + Vite 5)
 - Test Directory: frontend/src/__tests__
-- Test Framework: Vitest (TBD — frontend not yet built)
+- Test Framework: Vitest v2 + React Testing Library v16
+- Dev Server Port: 5173 (Vite)
+- Key Libraries: React Router DOM v6, TanStack Query v5, Zustand v4, clsx, @fontsource/inter
 
 backend/
 - Path: backend/
@@ -27,7 +29,7 @@ db/
 
 ### Shared/Common Code
 
-- Shared TypeScript types (Card, Board, Column) — location TBD (`shared/` or inlined per layer)
+- Shared TypeScript types (Card, Board, Column) — inlined in `frontend/src/types/domain.ts` (CE-6 decision: no shared workspace for MVP)
 
 ## Development Commands
 
@@ -116,11 +118,17 @@ npm run typecheck --prefix backend
 # Format backend code
 npm run format --prefix backend
 
-# Lint frontend (TBD)
+# Lint frontend
 npm run lint --prefix frontend
 
-# Type check frontend (TBD)
+# Lint and fix frontend
+npm run lint:fix --prefix frontend
+
+# Type check frontend
 npm run typecheck --prefix frontend
+
+# Format frontend code
+npm run format --prefix frontend
 ```
 
 ## Technology Stack
@@ -159,7 +167,12 @@ npm run typecheck --prefix frontend
 - **tsx** — backend TypeScript execution and hot-reload in development (via `npm run dev`)
 - **ESLint 9** — flat config format (`eslint.config.js`), with TypeScript and import plugins
 - **Prettier 3** — code formatting (config: `.prettierrc.json`)
-- **Vitest v2** — backend unit and integration testing (frontend TBD)
+- **Vitest v2** — unit and integration testing (backend + frontend)
+- **React Testing Library v16** — frontend component and hook testing
+- **React Router DOM v6** — client-side routing (`createBrowserRouter` data-router API)
+- **TanStack Query v5** — server state management and caching
+- **Zustand v4** — client-only UI state (selector-based to support FEAT-003 optimistic DnD)
+- **clsx v2** — conditional CSS class composition
 - **TypeScript 5** — strict mode with `noUncheckedIndexedAccess` and `noImplicitOverride`
 
 ### External Services
@@ -234,6 +247,21 @@ Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. F
   - No hardcoded config values (must use `config` object from `src/config/env.ts`)
   - DATABASE_URL required at startup (crash if missing)
 
+### 2026-05-18 — Phase 1 TASK-002: Frontend scaffold
+
+- **What Changed**: Frontend project created at `frontend/`
+  - **Scaffold**: Vite 5 + React 18 + TypeScript 5 (strict: noUncheckedIndexedAccess, noImplicitOverride)
+  - **Styles**: TailwindCSS v3 with semantic design tokens (surface, primary, border, text, nav, label palette — see TASK-002-app-shell-uiux.md)
+  - **Font**: Inter via `@fontsource/inter` (self-hosted, no CDN)
+  - **Logger**: `src/utils/logger.ts` thin env-aware wrapper (no-console ESLint rule with per-file exemption)
+  - **API client**: `src/api/apiClient.ts` typed fetch wrapper (`get/post/patch/delete`); reads `VITE_API_BASE_URL` with fallback to `http://localhost:3001` + logger.warn
+  - **Testing**: Vitest v2 + React Testing Library v16 + jsdom; `globals: true`
+  - **ESLint**: v9 flat config matching backend pattern; `no-console: error` in src
+  - **Docker**: `frontend/Dockerfile` (multi-stage); `docker-compose.yml` frontend service; dev override with bind-mount hot-reload
+- **Reason**: TASK-002 Phase 1 establishes the scaffold that FEAT-003/004 will build on
+- **Impact**: `npm run dev --prefix frontend` serves the app shell; `npm test/build/typecheck/lint` all pass
+- **12-Factor env vars**: `VITE_API_BASE_URL` — documented in `frontend/.env.example`
+
 ### 2026-05-16 — Initial stack defined
 
 - **What Changed**: Technology stack established for BanyanBoard MVP
@@ -244,5 +272,5 @@ Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. F
 
 ## Notes
 
-- Docker Compose service names: `frontend` (TBD), `backend`, `db`
+- Docker Compose service names: `frontend`, `backend`, `db`
 - Keep Development Commands updated as build scripts are added to package.json files
