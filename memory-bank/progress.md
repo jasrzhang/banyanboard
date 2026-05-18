@@ -7,6 +7,7 @@
 ## Planning Log
 
 | Date | Task | Phase | Note |
+| 2026-05-18 | TASK-002 Frontend Foundation | BUILD Phase 2/3 COMPLETE | App shell layout: AppShell.tsx (flex h-screen, backdrop overlay), Sidebar.tsx (fixed overlay tablet / static desktop, NavLink active states, 3 placeholder boards), BoardHeader.tsx (burger btn, board title, New Card btn), useSidebar.ts hook (isOpen/open/close/toggle), BoardListPage + BoardDetailPage placeholders, router/index.tsx (createBrowserRouter with Navigate redirect / → /boards, nested Outlet). 10/10 tests pass (3 Phase 1 + 4 AppShell + 3 routes). tsc+lint+build all pass. Code review: APPROVED. ACs covered: AC-HAPPY-1, AC-HAPPY-2, AC-NAV-1, AC-NAV-2. |
 | 2026-05-18 | TASK-002 Frontend Foundation | BUILD Phase 1/3 COMPLETE | Frontend scaffold: Vite 5 + React 18 + TypeScript 5 strict, TailwindCSS v3 with design tokens (slate/indigo, Inter font), ESLint v9 flat config (`no-console: error`), src/utils/logger.ts env-aware wrapper, src/api/apiClient.ts typed fetch wrapper (VITE_API_BASE_URL with fallback+warn), Vitest v2 + RTL v16, docker-compose.yml frontend service + override. 3/3 tests pass. tsc+lint+build all pass. Code review: APPROVED. ACs covered: AC-ENTRY-1, AC-HAPPY-3, AC-ERROR-1. |
 |------|------|-------|------|
 | 2026-05-16 | TASK-001 Project Foundation | PLANNING_COMPLETE | 7-phase plan, 8 ACs, 9 creative decisions → /banyan-creative required |

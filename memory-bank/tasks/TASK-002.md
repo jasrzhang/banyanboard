@@ -345,10 +345,9 @@ Three-phase build for the BanyanBoard frontend foundation. Phase 1 (scaffold) is
   - **Tests**: 3–4 (apiClient base URL, env var fallback, typecheck smoke)
   - **Gate**: `npm run typecheck`, `npm run lint`, `npm run test` all exit 0
 
-- [ ] Phase 2: App shell layout — `AppShell.tsx`, `Sidebar.tsx`, `BoardHeader.tsx`, placeholder page components, React Router v6 (or TanStack Router) routes, root `/` redirect, TailwindCSS theme tokens from creative phase applied
-  - **BLOCKED ON**: CE-1 (sidebar behaviour), CE-2 (colour tokens), CE-3 (routing library)
+- [x] Phase 2: App shell layout — `AppShell.tsx`, `Sidebar.tsx`, `BoardHeader.tsx`, placeholder page components, React Router v6 (or TanStack Router) routes, root `/` redirect, TailwindCSS theme tokens from creative phase applied
   - **ACs covered**: AC-HAPPY-1, AC-HAPPY-2, AC-NAV-1, AC-NAV-2
-  - **Tests**: 4–6 (AppShell renders three zones, sidebar links present, route smoke tests)
+  - **Tests**: 4/4 AppShell + 3/3 route smoke = 7 new tests (10 total)
   - **Gate**: Browser visual check at `http://localhost:5173`; all tests pass
 
 - [ ] Phase 3: State + query wiring — TanStack Query v5 `QueryClientProvider` at root, Zustand store (or Context) initial setup, `useAppStore` hook, `src/types/` domain interfaces, Docker Compose frontend service finalised
@@ -367,9 +366,9 @@ Three-phase build for the BanyanBoard frontend foundation. Phase 1 (scaffold) is
 ## Execution State
 
 **Build Status**: PHASE_COMPLETE
-**Current Build**: Phase 1: Project scaffold (TASK-002) — COMPLETE
+**Current Build**: Phase 2: App shell layout (TASK-002) — COMPLETE
 **Build Started**: 2026-05-18
-**Phase Number**: 1 of 3
+**Phase Number**: 2 of 3
 **Is Multi-Phase**: YES
 
 ### Current Build Step
@@ -378,32 +377,20 @@ Three-phase build for the BanyanBoard frontend foundation. Phase 1 (scaffold) is
 **Completed**: 2026-05-18
 
 ### Completed Steps
-- Step 0.1 (Plan): TASK-002 auto-provisioned for FEAT-002
-- Step 0.2 (Plan): Phase gate — PASSED
-- Step 3 (Plan): Spec Writer Agent (Sonnet) — COMPLETE
-- Step 3.2 (Plan): Human spec review — APPROVED
-- Step 4 (Plan): Codebase analysis — COMPLETE (no frontend/ exists; backend on port 3001; ESLint v9)
-- Step 5 (Plan): Implementation plan — COMPLETE (3 phases defined; Phase 1 unblocked; Phases 2–3 blocked on creative)
-- Step 6 (Plan): Validation gate — PASSED; creative phase REQUIRED (CE-1 through CE-6)
-- Creative UI/UX Design (Sonnet): COMPLETE — TASK-002-app-shell-uiux.md
-- Creative Architecture Design (Opus): COMPLETE — TASK-002-frontend-architecture.md
-- Creative validation: both output files confirmed
-- Step 0.5 (Build): Git Setup — COMPLETE. Branch feature/FEAT-002-frontend-foundation created; worktree at C:/git/banyanboard/.claude-worktrees/FEAT-002
-- Step 1 (Build): Read Task Context — COMPLETE. Phase 1 of 3 identified (Project scaffold)
-- Step 2 (Build): Load Complexity Context — Level 3 rules noted
-- Step 3 (Build): Test Writer — COMPLETE. apiClient.test.ts (3 tests): baseUrl config, env var fallback+warn, typed methods
-- Step 4 (Build): Coding Agent — COMPLETE. All scaffold files created. Vitest spy bug fixed in test (removed inner vi.resetModules()). vitest.config.ts: globals:true
-- Step 5–6 (Build): Tests — 3/3 pass
-- Step 7 (Build): Integration Verification — Tests 3/3 PASS, Build PASS, Lint PASS (0 errors), Typecheck PASS
-- Step 8 (Build): Code Review — APPROVED. No security issues; logger wrapper correct; TypeScript strict satisfied
-- Step 9 (Build): Documentation — techContext.md, progress.md, tasks.md updated
-- Step 10 (Build): Memory Bank — COMPLETE
-- Step 11 (Build): Git Completion — committed Phase 1 to feature/FEAT-002-frontend-foundation
+- Phase 1: All steps COMPLETE (see history above)
+- Step 1 (Build P2): Read Task Context — Phase 2 of 3 identified (App Shell Layout)
+- Step 3 (Build P2): Test Writer — AppShell.test.tsx (4 tests), routes.test.tsx (3 tests)
+- Step 4 (Build P2): Coding Agent — useSidebar.ts, AppShell.tsx, Sidebar.tsx, BoardHeader.tsx, BoardListPage.tsx, BoardDetailPage.tsx, router/index.tsx; updated main.tsx; deleted dead App.tsx
+- Step 5–6 (Build P2): Tests — 10/10 pass (3 Phase 1 + 4 AppShell + 3 routes)
+- Step 7 (Build P2): Integration Verification — Tests 10/10 PASS, Build PASS, Lint PASS, Typecheck PASS
+- Step 8 (Build P2): Code Review — APPROVED. CE-1/CE-2/CE-3 creative decisions applied correctly; a11y attributes present; semantic tokens used; no console in production code; v7_startTransition flag not added (not supported in react-router-dom@6.26 types)
+- Step 9–10 (Build P2): Memory bank updated (tasks.md, TASK-002.md, progress.md)
+- Step 11 (Build P2): Git Completion — committed Phase 2 to feature/FEAT-002-frontend-foundation
 
 ### Sub-Agents
-(none — orchestrator implemented Phase 1 directly)
+(none — orchestrator implemented Phase 2 directly)
 
 ### Resumption Notes
 **Can Resume**: YES
-**Resume From**: Phase 2 — App Shell Layout (/banyan-build TASK-002 next invocation)
-**Notes**: Phase 1 complete. Phase 2 (App Shell Layout) requires CE-1 (sidebar) and CE-2 (colour tokens) from TASK-002-app-shell-uiux.md — COMPLETE. Phase 2 is now unblocked.
+**Resume From**: Phase 3 — State + Query Wiring (/banyan-build TASK-002 next invocation)
+**Notes**: Phase 2 complete. Phase 3 needs CE-4 (Zustand) and CE-6 (inline types) decisions — both RESOLVED in TASK-002-frontend-architecture.md.
