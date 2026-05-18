@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import type { Card } from '../../types/domain';
 
 interface CardTileProps {
@@ -37,32 +39,53 @@ function GripIcon() {
 
 export function CardTile({ card, boardId, isDragOverlay = false }: CardTileProps) {
   const navigate = useNavigate();
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: card.id,
+    disabled: isDragOverlay,
+  });
+
+  const style = isDragOverlay
+    ? {}
+    : {
+        transform: CSS.Transform.toString(transform),
+        transition,
+      };
 
   const wrapperClasses = isDragOverlay
     ? 'bg-surface-card rounded-lg border border-border shadow-xl rotate-1 scale-105 p-3'
-    : 'group relative bg-surface-card rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow duration-150 p-3 cursor-default';
+    : [
+        'group relative bg-surface-card rounded-lg border border-border',
+        'transition-shadow duration-150 p-3 cursor-default',
+        isDragging ? 'opacity-30 border-dashed shadow-none' : 'shadow-sm hover:shadow-md',
+      ].join(' ');
 
   return (
-    <div className={wrapperClasses}>
+    <div ref={isDragOverlay ? undefined : setNodeRef} style={style} className={wrapperClasses}>
       <div className="flex items-start gap-2">
-        {/* Drag handle — Phase 4 wires DnD listeners here */}
-        <span
+        {/* Drag handle — activates DnD drag */}
+        <button
+          {...(!isDragOverlay ? listeners : {})}
+          {...(!isDragOverlay ? attributes : {})}
           className="opacity-0 group-hover:opacity-100 transition-opacity duration-100
                      text-text-disabled hover:text-text-secondary
                      cursor-grab active:cursor-grabbing
                      flex-shrink-0 mt-0.5 p-0.5 -ml-1 rounded"
           aria-label="Drag to reorder card"
-          tabIndex={0}
-          role="button"
+          tabIndex={isDragOverlay ? -1 : 0}
         >
           <GripIcon />
-        </span>
+        </button>
 
         {/* Card body — clickable, navigates to card detail */}
         <button
-          onClick={() => navigate(`/boards/${boardId}/cards/${card.id}`)}
+          onClick={() => {
+            if (!isDragging && !isDragOverlay) {
+              navigate(`/boards/${boardId}/cards/${card.id}`);
+            }
+          }}
           className="flex-1 text-left min-w-0 focus:outline-none focus:ring-2
                      focus:ring-primary focus:ring-offset-1 rounded"
+          tabIndex={isDragOverlay ? -1 : 0}
         >
           <p className="text-sm font-medium text-text-primary leading-snug mb-1">{card.title}</p>
 

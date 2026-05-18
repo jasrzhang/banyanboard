@@ -15,6 +15,6 @@ export function createCard(columnId: string, data: CreateCardRequest): Promise<C
   return apiClient.post<Card>(`/api/columns/${columnId}/cards`, data);
 }
 
-export function moveCard(cardId: string, data: UpdateCardRequest): Promise<Card> {
-  return apiClient.patch<Card>(`/api/cards/${cardId}`, data);
+export function moveCard(cardId: string, data: UpdateCardRequest, options?: { signal?: AbortSignal }): Promise<Card> {
+  return apiClient.patch<Card>(`/api/cards/${cardId}`, data, { signal: options?.signal });
 }

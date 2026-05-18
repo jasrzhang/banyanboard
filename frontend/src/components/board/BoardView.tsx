@@ -1,7 +1,27 @@
+import { useState } from 'react';
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  KeyboardSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBoard } from '../../hooks/useBoard';
+import { useMoveCard } from '../../hooks/useMoveCard';
 import { createCard } from '../../api/boardsApi';
+import type { Board, Card } from '../../types/domain';
 import { Column } from './Column';
+import { CardTile } from '../card/CardTile';
 import { BoardErrorPanel } from './BoardErrorPanel';
 import { ColumnSkeleton } from '../card/CardSkeleton';
 
@@ -9,27 +29,97 @@ interface BoardViewProps {
   boardId: string;
 }
 
+function findCardById(board: Board, cardId: string): Card | undefined {
+  for (const col of board.columns) {
+    const card = col.cards.find((c) => c.id === cardId);
+    if (card) return card;
+  }
+  return undefined;
+}
+
+function findColumnByCardId(board: Board, cardId: string): string | undefined {
+  for (const col of board.columns) {
+    if (col.cards.some((c) => c.id === cardId)) return col.id;
+  }
+  return undefined;
+}
+
+function findTargetColumnId(board: Board, overId: string): string | undefined {
+  if (board.columns.some((col) => col.id === overId)) return overId;
+  return findColumnByCardId(board, overId);
+}
+
+function computeNewPosition(board: Board, draggedCardId: string, overId: string, targetColumnId: string): number {
+  const targetColumn = board.columns.find((col) => col.id === targetColumnId);
+  if (!targetColumn) return 1000;
+
+  const targetCards = targetColumn.cards.filter((c) => c.id !== draggedCardId);
+
+  if (targetCards.length === 0) return 1000;
+
+  const overCardIndex = targetCards.findIndex((c) => c.id === overId);
+
+  if (overCardIndex === -1) {
+    return Math.max(...targetCards.map((c) => c.position)) + 1000;
+  }
+
+  if (overCardIndex === 0) {
+    return Math.max(1, Math.floor(targetCards[0]!.position / 2));
+  }
+
+  const prevCard = targetCards[overCardIndex - 1]!;
+  const overCard = targetCards[overCardIndex]!;
+  return Math.floor((prevCard.position + overCard.position) / 2);
+}
+
 export function BoardView({ boardId }: BoardViewProps) {
+  const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { data: board, isLoading, isError, error, refetch } = useBoard(boardId);
+  const { mutate: moveCardMutation } = useMoveCard(boardId);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveCardId(String(event.active.id));
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveCardId(null);
+    const { active, over } = event;
+    if (!over || !board) return;
+
+    const draggedCardId = String(active.id);
+    const overId = String(over.id);
+
+    const fromColumnId = findColumnByCardId(board, draggedCardId);
+    const toColumnId = findTargetColumnId(board, overId);
+
+    if (!fromColumnId || !toColumnId) return;
+    if (fromColumnId === toColumnId && draggedCardId === overId) return;
+
+    const newPosition = computeNewPosition(board, draggedCardId, overId, toColumnId);
+
+    moveCardMutation({ cardId: draggedCardId, fromColumnId, toColumnId, position: newPosition });
+  };
 
   const handleAddCard = async (columnId: string, title: string) => {
     const newCard = await createCard(columnId, { title });
-    queryClient.setQueryData(
-      ['board', boardId],
-      (old: typeof board) => {
-        if (!old) return old;
-        return {
-          ...old,
-          columns: old.columns.map((col) =>
-            col.id === columnId
-              ? { ...col, cards: [...col.cards, newCard] }
-              : col,
-          ),
-        };
-      },
-    );
+    queryClient.setQueryData(['board', boardId], (old: typeof board) => {
+      if (!old) return old;
+      return {
+        ...old,
+        columns: old.columns.map((col) =>
+          col.id === columnId ? { ...col, cards: [...col.cards, newCard] } : col,
+        ),
+      };
+    });
   };
+
+  const activeCard = board && activeCardId ? findCardById(board, activeCardId) : null;
 
   if (isLoading) {
     return (
@@ -63,19 +153,30 @@ export function BoardView({ boardId }: BoardViewProps) {
   }
 
   return (
-    <div
-      className="flex flex-row gap-3 h-full px-4 py-4 overflow-x-auto"
-      aria-label="Kanban board columns"
-      role="region"
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
     >
-      {board.columns.map((column) => (
-        <Column
-          key={column.id}
-          column={column}
-          boardId={boardId}
-          onAddCard={handleAddCard}
-        />
-      ))}
-    </div>
+      <div
+        className="flex flex-row gap-3 h-full px-4 py-4 overflow-x-auto"
+        aria-label="Kanban board columns"
+        role="region"
+      >
+        {board.columns.map((column) => (
+          <SortableContext
+            key={column.id}
+            items={column.cards.map((c) => c.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <Column column={column} boardId={boardId} onAddCard={handleAddCard} />
+          </SortableContext>
+        ))}
+        <DragOverlay>
+          {activeCard ? <CardTile card={activeCard} boardId={boardId} isDragOverlay /> : null}
+        </DragOverlay>
+      </div>
+    </DndContext>
   );
 }

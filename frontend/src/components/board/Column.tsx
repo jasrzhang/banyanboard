@@ -1,3 +1,4 @@
+import { useDroppable } from '@dnd-kit/core';
 import type { Column as ColumnType } from '../../types/domain';
 import { CardTile } from '../card/CardTile';
 import { AddCardForm } from '../card/AddCardForm';
@@ -9,6 +10,8 @@ interface ColumnProps {
 }
 
 export function Column({ column, boardId, onAddCard }: ColumnProps) {
+  const { setNodeRef } = useDroppable({ id: column.id });
+
   return (
     <div className="flex-shrink-0 w-[300px] flex flex-col rounded-xl bg-surface-sidebar border border-border max-h-full overflow-y-auto">
       {/* Sticky column header */}
@@ -27,8 +30,8 @@ export function Column({ column, boardId, onAddCard }: ColumnProps) {
         </div>
       </div>
 
-      {/* Card list */}
-      <div className="flex flex-col gap-2 p-2 flex-1">
+      {/* Card list — droppable zone */}
+      <div ref={setNodeRef} className="flex flex-col gap-2 p-2 flex-1">
         {column.cards.length === 0 ? (
           <div
             className="flex flex-col items-center justify-center

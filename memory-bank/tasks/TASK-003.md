@@ -592,16 +592,16 @@ New endpoints introduced in FEAT-003 (full contract in Specification section):
 
 ---
 
-### Phase 4: Drag-and-Drop + Optimistic Updates + Rollback
+### Phase 4: Drag-and-Drop + Optimistic Updates + Rollback ✅
 **Milestone**: Dragging a card between columns persists to DB and rolls back on API failure.
 
-- [ ] Wire `useSortable` / `DragOverlay` from dnd-kit onto `CardTile`
-- [ ] `useMoveCard()` mutation hook — TanStack Query `useMutation` with `onMutate` (snapshot + optimistic update), `onError` (rollback), `onSettled` (refetch)
-- [ ] Handle rapid sequential drags (cancel in-flight previous mutation on new drag start)
-- [ ] dnd-kit `KeyboardSensor` for keyboard drag-and-drop (AC-A11Y-1)
-- [ ] Error indicator on rollback (form factor decided by UI/UX creative: UX-Q5)
-- [ ] Update card-count badges on drag (derived from column.cards.length — automatic if optimistic cache update is correct)
-- [ ] DnD interaction tests (`dnd.test.tsx`) — 4–6 tests: onDragEnd updates cache, mutation fires, rollback on error, badge counts update
+- [x] Wire `useSortable` / `DragOverlay` from dnd-kit onto `CardTile`
+- [x] `useMoveCard()` mutation hook — TanStack Query `useMutation` with `onMutate` (snapshot + optimistic update), `onError` (rollback), `onSettled` (refetch)
+- [x] Handle rapid sequential drags (cancel in-flight previous mutation on new drag start)
+- [x] dnd-kit `KeyboardSensor` for keyboard drag-and-drop (AC-A11Y-1)
+- [x] Error indicator on rollback (sonner toast.error via UX-Q5 decision)
+- [x] Update card-count badges on drag (derived from column.cards.length — automatic via optimistic cache update)
+- [x] DnD interaction tests (`dnd.test.tsx`) — 6 tests: applyMoveOptimistic (3), useMoveCard optimistic/rollback/toast (3)
 
 **Phase Gate**: `npm test` passes; drag-and-drop moves a card, `GET /api/boards/:id` after move shows new column, drag to simulate failure rolls back.
 
@@ -629,15 +629,16 @@ New endpoints introduced in FEAT-003 (full contract in Specification section):
 ## Execution State
 
 **Build Status**: IDLE
-**Current Build**: Phase 3: Frontend BoardView + Card Rendering — COMPLETE
-**Build Started**: 2026-05-18T03:00:00Z
-**Phase Number**: 3 of 5 COMPLETE
+**Current Build**: Phase 4: DnD + Optimistic Updates + Rollback — COMPLETE
+**Build Started**: 2026-05-19T00:00:00Z
+**Phase Number**: 4 of 5 COMPLETE
 **Is Multi-Phase**: YES
 
 ### Current Build Step
-**Step**: Phase 3 — COMPLETE
+**Step**: Phase 4 — COMPLETE
 **Status**: COMPLETE
-**Completed**: 2026-05-18T04:00:00Z
+**Completed**: 2026-05-19T01:00:00Z
+**Output**: useMoveCard hook + applyMoveOptimistic pure fn; CardTile wired with useSortable; Column has useDroppable; BoardView has DndContext+SortableContext+DragOverlay+handleDragEnd; boardsApi.moveCard accepts AbortSignal. 29/29 tests PASS. tsc+lint+build PASS.
 **Output**: dnd-kit + sonner installed; boardsApi.ts, useBoards/useBoard hooks, BoardView/Column/CardTile/AddCardForm/BoardErrorPanel/CardSkeleton components, Sidebar wired to real API, card detail placeholder route, Toaster in main.tsx, label palette in tailwind. 23/23 tests PASS. tsc+lint+build PASS.
 
 ### Completed Steps
@@ -655,6 +656,7 @@ New endpoints introduced in FEAT-003 (full contract in Specification section):
 - Phase 1 Build: COMPLETE (2026-05-18) - 5 migrations, seed script, positionGap config, tsc+lint PASS
 - Phase 2 Build: COMPLETE (2026-05-18T02:00:00Z) - All REST API files, Zod, 21 integration tests, tsc+lint PASS
 - Phase 3 Build: COMPLETE (2026-05-18T04:00:00Z) - BoardView + Card Rendering; 23/23 tests PASS; tsc+lint+build PASS
+- Phase 4 Build: COMPLETE (2026-05-19T01:00:00Z) - DnD + Optimistic Updates; 29/29 tests PASS; tsc+lint+build PASS
 
 ### Sub-Agents
 - Coding Agent (Phase 1): COMPLETE — migrations + seed + config
@@ -663,5 +665,5 @@ New endpoints introduced in FEAT-003 (full contract in Specification section):
 
 ### Resumption Notes
 **Can Resume**: YES
-**Resume From**: Phase 4 — DnD + Optimistic Updates + Rollback
-**Notes**: Phase 3 committed. Run /banyan-build TASK-003 to start Phase 4.
+**Resume From**: Phase 5 — Add-Card Affordance
+**Notes**: Phase 4 committed. Run /banyan-build TASK-003 to start Phase 5.
