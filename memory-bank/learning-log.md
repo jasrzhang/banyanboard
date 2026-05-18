@@ -26,3 +26,13 @@ Chronological record of pattern extraction and consolidation events from task re
 
 ### systemPatterns.md Updates
 - None (state-layer split is a frontend-specific architectural contract; recommended for `systemPatterns.md` Frontend section — deferred per reflection recommendation)
+
+---
+
+## 2026-05-18 - Consolidation (during TASK-002 archive)
+
+- Files before: 6, Files after: 6
+- Merged: 0 files
+- Expired: 0 bullets (0 files deleted)
+- Promoted: 0 files to medium priority
+- Pruned: 0 excess bullets

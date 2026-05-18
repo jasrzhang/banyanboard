@@ -33,3 +33,14 @@
 ---
 
 *Updated by `/banyan-archive` after each task completion.*
+
+---
+
+## Task Archive: TASK-002
+
+**Task**: Frontend Foundation
+**Status**: ✅ ARCHIVED
+**Date**: 2026-05-18
+**Archive**: `memory-bank/archive/archive-TASK-002.md`
+
+---
