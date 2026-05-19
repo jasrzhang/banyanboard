@@ -2,7 +2,7 @@
 name: "Learned: Testing Patterns — Layering Enforcement + State Isolation"
 globs: ["src/__tests__/*.ts", "*.test.ts", "*.test.tsx", "eslint.config.*", "src/store/*.test.*"]
 topics: ["testing-patterns", "architecture", "eslint", "layering", "zustand", "react-router"]
-priority: low
+priority: medium
 evidence_count: 3
 last_updated: 2026-05-19
 auto_generated: true

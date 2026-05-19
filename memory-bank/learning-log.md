@@ -72,3 +72,13 @@ Chronological record of pattern extraction and consolidation events from task re
 
 ### systemPatterns.md Updates
 - None (patterns are frontend-specific coding practices, not system-level architecture patterns)
+
+---
+
+## 2026-05-19 - Consolidation (during TASK-004 archive)
+
+- Files before: 9, Files after: 9
+- Merged: 0 files
+- Expired: 0 bullets (0 files deleted)
+- Promoted: 2 files to medium priority (architecture.md, testing-patterns.md — both reached evidence_count 3)
+- Pruned: 0 excess bullets

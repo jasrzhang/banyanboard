@@ -22,8 +22,8 @@
 
 | File | Topics | Evidence Count | Priority | Last Updated |
 |------|--------|---------------:|:--------:|:------------:|
-| architecture.md | architecture, typescript, utility-extraction | 3 | low | 2026-05-19 |
-| testing-patterns.md | testing-patterns, eslint, zustand, react-router | 3 | low | 2026-05-19 |
+| architecture.md | architecture, typescript, utility-extraction | 3 | **medium** | 2026-05-19 |
+| testing-patterns.md | testing-patterns, eslint, zustand, react-router | 3 | **medium** | 2026-05-19 |
 | error-handling.md | error-handling, shutdown, abort-error | 2 | low | 2026-05-19 |
 | state-architecture.md | state-architecture, react, zustand | 2 | low | 2026-05-19 |
 | observability.md | observability, logging | 1 | low | 2026-05-16 |
@@ -38,3 +38,4 @@
 |------|------------:|------------:|-------:|--------:|---------:|
 | 2026-05-18 | 6 | 6 | 0 | 0 | 0 |
 | 2026-05-19 | 8 | 8 | 0 | 0 | 0 |
+| 2026-05-19 | 9 | 9 | 0 | 0 | 2 |

@@ -2,7 +2,7 @@
 name: "Learned: Architecture — Interface-First Design + Utility Extraction"
 globs: ["src/types/*.ts", "src/config/*.ts", "*.ts", "frontend/src/**/*.ts", "frontend/src/**/*.tsx"]
 topics: ["architecture", "typescript", "interface-design", "utility-extraction", "frontend"]
-priority: low
+priority: medium
 evidence_count: 3
 last_updated: 2026-05-19
 auto_generated: true

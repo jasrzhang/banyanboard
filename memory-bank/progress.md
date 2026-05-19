@@ -60,3 +60,12 @@ See task archives below for completed tasks.
 **Archive**: `memory-bank/archive/archive-TASK-003.md`
 
 ---
+
+## Task Archive: TASK-004
+
+**Task**: Card Detail Modal + Search/Filter
+**Status**: ✅ ARCHIVED
+**Date**: 2026-05-19
+**Archive**: `memory-bank/archive/archive-TASK-004.md`
+
+---
