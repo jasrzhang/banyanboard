@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -282,6 +282,75 @@ describe('BoardView', () => {
     const dateParts = screen.queryAllByTestId('card-due-date');
     // Only card-1 has a due date
     expect(dateParts).toHaveLength(1);
+  });
+});
+
+describe('BoardView search and filter', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseBoard.mockReturnValue(makeBoardResult({ data: fixtureBoard, isSuccess: true }));
+  });
+
+  it('renders board name in the board header', () => {
+    render(<BoardViewWrapper />);
+    expect(screen.getByText('Test Board')).toBeInTheDocument();
+  });
+
+  it('renders search input in the board header', () => {
+    render(<BoardViewWrapper />);
+    expect(screen.getByPlaceholderText('Search cards...')).toBeInTheDocument();
+  });
+
+  it('renders New Card button in the board header', () => {
+    render(<BoardViewWrapper />);
+    expect(screen.getByRole('button', { name: /new card/i })).toBeInTheDocument();
+  });
+
+  it('typing in search input hides non-matching cards', () => {
+    render(<BoardViewWrapper />);
+    const searchInput = screen.getByPlaceholderText('Search cards...');
+    fireEvent.change(searchInput, { target: { value: 'login' } });
+    // 'Fix login bug' matches; 'Write API docs' and 'Implement Kanban UI' do not
+    expect(screen.getByText('Fix login bug')).toBeInTheDocument();
+    expect(screen.queryByText('Write API docs')).not.toBeInTheDocument();
+    expect(screen.queryByText('Implement Kanban UI')).not.toBeInTheDocument();
+  });
+
+  it('clearing search input restores all cards', () => {
+    render(<BoardViewWrapper />);
+    const searchInput = screen.getByPlaceholderText('Search cards...');
+    fireEvent.change(searchInput, { target: { value: 'login' } });
+    fireEvent.change(searchInput, { target: { value: '' } });
+    expect(screen.getByText('Fix login bug')).toBeInTheDocument();
+    expect(screen.getByText('Write API docs')).toBeInTheDocument();
+    expect(screen.getByText('Implement Kanban UI')).toBeInTheDocument();
+  });
+
+  it('clicking a label chip hides cards without that label', () => {
+    render(<BoardViewWrapper />);
+    // Open the Filters panel
+    fireEvent.click(screen.getByRole('button', { name: /filters/i }));
+    // Scope to filter panel to avoid matching label chips on card tiles
+    const filterPanel = screen.getByRole('group', { name: /filter options/i });
+    fireEvent.click(within(filterPanel).getByRole('button', { name: /^bug$/i }));
+    // card-1 has 'bug' label → visible; others are not
+    expect(screen.getByText('Fix login bug')).toBeInTheDocument();
+    expect(screen.queryByText('Write API docs')).not.toBeInTheDocument();
+    expect(screen.queryByText('Implement Kanban UI')).not.toBeInTheDocument();
+  });
+
+  it('clicking an active label chip removes the filter and restores cards', () => {
+    render(<BoardViewWrapper />);
+    // Open filters, activate bug chip
+    fireEvent.click(screen.getByRole('button', { name: /filters/i }));
+    const filterPanel = screen.getByRole('group', { name: /filter options/i });
+    fireEvent.click(within(filterPanel).getByRole('button', { name: /^bug$/i }));
+    // Now deactivate it
+    fireEvent.click(within(filterPanel).getByRole('button', { name: /^bug$/i }));
+    // All cards should be visible
+    expect(screen.getByText('Fix login bug')).toBeInTheDocument();
+    expect(screen.getByText('Write API docs')).toBeInTheDocument();
+    expect(screen.getByText('Implement Kanban UI')).toBeInTheDocument();
   });
 });
 

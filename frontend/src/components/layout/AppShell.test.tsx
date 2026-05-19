@@ -60,9 +60,10 @@ describe('AppShell', () => {
     expect(screen.getByRole('link', { name: /my board/i })).toBeInTheDocument();
   });
 
-  it('renders "New Card" button in the board header', () => {
+  it('renders BanyanBoard wordmark in the generic top bar', () => {
     renderAppShell();
-    expect(screen.getByRole('button', { name: /new card/i })).toBeInTheDocument();
+    const header = screen.getByRole('banner');
+    expect(header).toHaveTextContent('BanyanBoard');
   });
 
   it('burger menu button toggles sidebar open state without crashing', async () => {

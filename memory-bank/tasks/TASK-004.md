@@ -1,7 +1,7 @@
 # TASK-004: Card Detail Modal + Search/Filter
 
 **Complexity**: Level 3
-**Status**: CREATIVE_COMPLETE
+**Status**: BUILD_COMPLETE
 **Roadmap**: FEAT-004
 **Branch**: feature/FEAT-004-card-detail-search-filter
 **Worktree**: N/A
@@ -280,13 +280,13 @@ Yes — the following questions require design exploration before implementation
   - [x] 1.5: Update `frontend/src/components/board/BoardView.tsx` — add `<Outlet>` for route-based modal rendering (CardTile navigate unchanged — already correct)
   - [x] 1.6: Write 9 tests in `frontend/src/__tests__/cardDetail.test.tsx`
 
-- [ ] Phase 2: Board Search + Filter
-  - [ ] 2.1: Extend `frontend/src/store/appStore.ts` — add `searchQuery: string`, `activeLabelIds: string[]`, `activeDateFilter: 'none' | 'overdue' | 'due-soon'` + setters; reset all on board navigation
-  - [ ] 2.2: Create `frontend/src/utils/filterCards.ts` — pure `filterCards(cards: Card[], filters: FilterState): Card[]` function (used by `BoardView` and tested in isolation)
-  - [ ] 2.3: Update `frontend/src/components/layout/BoardHeader.tsx` — accept `boardName`, `searchQuery`, `onSearchChange`, `labels`, `activeLabelIds`, `onLabelToggle`, `activeDateFilter`, `onDateFilterChange` props; render search input + label chips + "Overdue"/"Due Soon" chips
-  - [ ] 2.4: Update `frontend/src/components/board/BoardView.tsx` — derive `labels` from board data (distinct labels across all cards); apply `filterCards` to each column's cards before rendering; pass filter state/handlers down to `BoardHeader` (or update `AppShell`/`BoardDetailPage` to thread board data — per creative phase decision)
-  - [ ] 2.5: Add per-column empty state — when `filteredCards.length === 0` for a column, render "No matching cards" placeholder instead of blank column
-  - [ ] 2.6: Write 10–12 tests across `frontend/src/__tests__/boardSearch.test.tsx` (pure function unit tests) and extend `frontend/src/__tests__/boardView.test.tsx` (integration)
+- [x] Phase 2: Board Search + Filter
+  - [x] 2.1: Filter state as `useState` in `BoardView` (creative doc Q4 decision overrides roadmap — no appStore changes needed)
+  - [x] 2.2: Create `frontend/src/utils/filterCards.ts` — pure `filterCards(cards: Card[], filters: FilterState): Card[]` function
+  - [x] 2.3: Create `frontend/src/components/board/BoardHeader.tsx` (new board/ location per creative Q4); create `SearchInput`, `FilterChip`, `FiltersDropdown` in `filters/`; create `GenericTopBar` replacing `layout/BoardHeader` in `AppShell`
+  - [x] 2.4: Update `frontend/src/components/board/BoardView.tsx` — `allLabels` (useMemo), `filteredColumns` (useMemo with filterCards), `BoardHeader` rendered inside `BoardView`
+  - [x] 2.5: `Column.tsx` updated with `isFiltering` prop → "No matching cards" vs "No cards yet"
+  - [x] 2.6: 9 tests in `boardSearch.test.tsx` + 6 tests extending `boardView.test.tsx` = 15 new tests
 
 ## Creative Phases
 
@@ -303,15 +303,15 @@ Yes — the following questions require design exploration before implementation
 
 ## Execution State
 
-**Build Status**: PHASE_COMPLETE
-**Current Phase**: BUILD — Phase 1: Card Detail Modal COMPLETE
-**Phase Number**: 1 of 2
+**Build Status**: BUILD_COMPLETE
+**Current Phase**: ALL PHASES COMPLETE
+**Phase Number**: 2 of 2
 **Is Multi-Phase**: YES
 **Build Started**: 2026-05-19T00:00:00Z
 **Can Resume**: NO
 
 ### Current Build Step
-**Step**: Step 11 — Git Commit
+**Step**: Step 11 — Git Commit (Phase 2)
 **Status**: COMPLETE
 
 ### Active Sub-Agents
@@ -332,8 +332,13 @@ Yes — the following questions require design exploration before implementation
 - Step 4 (BUILD P1): Code implemented — `updateCard` in boardsApi, `useUpdateCard` hook, `CardDetailModal`, router nested routes, `BoardView` Outlet (2026-05-19)
 - Step 7 (BUILD P1): Integration verification — 52/52 tests pass, typecheck clean, lint clean (2026-05-19)
 - Step 11 (BUILD P1): Git commit on feature branch (2026-05-19)
+- Step 0.5 (BUILD P2): On feature branch `feature/FEAT-004-card-detail-search-filter` (2026-05-19)
+- Step 3 (BUILD P2): Tests written — 9 tests in `boardSearch.test.tsx`, 6 new in `boardView.test.tsx` (2026-05-19)
+- Step 4 (BUILD P2): Code implemented — `filterCards`, `SearchInput`, `FilterChip`, `FiltersDropdown`, `GenericTopBar`, `board/BoardHeader`, AppShell updated, BoardView updated, Column updated (2026-05-19)
+- Step 7 (BUILD P2): Integration verification — 68/68 tests pass, typecheck clean, lint clean, build clean (2026-05-19)
+- Step 11 (BUILD P2): Git commit on feature branch (2026-05-19)
 
 ### Resumption Notes
-**Can Resume**: YES
-**Resume From**: Phase 2 — Board Search + Filter
-**Notes**: Phase 1 complete. Next: `/banyan-build TASK-004` for Phase 2 (search bar, filter chips, filterCards utility, BoardHeader moved into BoardView).
+**Can Resume**: NO
+**Resume From**: N/A — BUILD_COMPLETE
+**Notes**: Both phases complete. Next: `/banyan-reflect TASK-004` then `/banyan-archive TASK-004`.
