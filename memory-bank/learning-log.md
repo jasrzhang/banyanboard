@@ -36,3 +36,16 @@ Chronological record of pattern extraction and consolidation events from task re
 - Expired: 0 bullets (0 files deleted)
 - Promoted: 0 files to medium priority
 - Pruned: 0 excess bullets
+
+---
+
+## 2026-05-19 - TASK-003 Reflection
+
+### Extracted Patterns
+- **optimistic-updates** → created `agent-rules/_learned/optimistic-updates.md` (evidence count: 1) — Pure function extraction alongside mutation hooks for isolated unit testing
+- **data-access** → created `agent-rules/_learned/data-access.md` (evidence count: 1) — Atomic single-statement INSERT subquery for auto-assigned positions
+- **error-handling** → amended `agent-rules/_learned/error-handling.md` (evidence count: 2) — AbortError filtering in mutation onError handlers with cancel-previous pattern
+- **architecture** → amended `agent-rules/_learned/architecture.md` (evidence count: 2) — Utility extraction: isolate pure computation functions in `utils/` module with unit tests
+
+### systemPatterns.md Updates
+- None (patterns are coding practices, not system-level architecture patterns)
