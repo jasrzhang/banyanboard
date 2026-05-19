@@ -2,7 +2,7 @@
 
 ## Summary
 - **Total Features**: 4
-- **Complete Features**: 3 (FEAT-001, FEAT-002, FEAT-003)
+- **Complete Features**: 4 (FEAT-001, FEAT-002, FEAT-003, FEAT-004)
 - **Released Versions**: 0
 - **Active Versions**: 0
 - **Planning Versions**: 2
@@ -80,10 +80,11 @@
 
 ### FEAT-004: Card Detail Modal + Search/Filter
 - **Version**: v0.2.0
-- **Status**: planned
+- **Status**: complete
 - **Priority**: medium
 - **Complexity**: Level 3
 - **Description**: Card detail modal (click card → modal with full title, description, due date, labels; inline edit and save). Board-level search bar (filter cards by title text). Label and due-date filter chips in the board header. All filters applied client-side against TanStack Query cache.
-- **Linked Tasks**: None
-- **Branch**: feature/FEAT-004-card-detail-search-filter
+- **Linked Tasks**: TASK-004 (complete)
+- **Branch**: feature/FEAT-004-card-detail-search-filter (merged 2026-05-19)
 - **Created**: 2026-05-16
+- **Completed**: 2026-05-19

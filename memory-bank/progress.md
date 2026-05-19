@@ -7,6 +7,8 @@ See task archives below for completed tasks.
 ## Planning Log
 
 | Date | Task | Phase | Note |
+| 2026-05-19 | TASK-004 Card Detail + Search/Filter | BUILD Phase 2/2 COMPLETE | Board Search + Filter: filterCards pure utility (search/label/date-filter, AND semantics). SearchInput (sr-only label, search icon, controlled input). FilterChip (aria-pressed, active/inactive/color styles). FiltersDropdown (Filters/Filters(N) button, absolute panel, label chips + Overdue + Due Soon + Clear all, outside-click close, Escape close). GenericTopBar (replaces BoardHeader in AppShell — hamburger + BanyanBoard wordmark). board/BoardHeader (boardName, search, filters dropdown, New Card button). AppShell updated to use GenericTopBar. BoardView: filter state (useState), allLabels (useMemo deduplicate), filteredColumns (useMemo with filterCards), BoardHeader rendered inside BoardView. Column: isFiltering prop → "No matching cards" vs "No cards yet" empty state. AppShell.test updated (removed "New Card" test, added wordmark test). boardView.test extended (6 new search/filter tests). boardSearch.test new (9 pure-function tests). 68/68 tests PASS. tsc+lint+build PASS. |
+| 2026-05-19 | TASK-004 Card Detail + Search/Filter | BUILD Phase 1/2 COMPLETE | Card Detail Modal: boardsApi.updateCard. useUpdateCard hook (optimistic cache write + rollback + toast). CardDetailModal (route-rendered via Outlet at /boards/:boardId/cards/:cardId; portal to document.body; inline edit title/description/dueDate; label display; dirty check; save/cancel; Escape; focus trap; inline error). Router nested route replaces CardDetailPlaceholderPage. BoardView Outlet added. 9 tests in cardDetail.test.tsx. 52/52 tests PASS. tsc+lint+build PASS. |
 | 2026-05-19 | TASK-003 Kanban Board UI | BUILD_COMPLETE (all 5 phases) | Phase 5 Add-Card Affordance: useCreateCard hook (applyCreateOptimistic + replaceCard pure functions; TanStack Query useMutation onMutate/onSuccess/onError/onSettled pattern; optimistic append with crypto.randomUUID() tempId; rollback to previous cache on error; sonner toast.error on failure). BoardView updated to use useCreateCard (replaced inline handleAddCard). AddCardForm.handleSubmit catch block prevents unhandled rejection on API failure. 13 new tests in createCard.test.tsx (pure fn tests, hook tests: optimistic/success/error/cache-miss, component: closed state, open on click, submit+close, stays-open-on-error). 42/42 tests PASS. tsc+lint+build PASS. |
 | 2026-05-19 | TASK-003 Kanban Board UI | BUILD Phase 4/5 COMPLETE | DnD + Optimistic Updates + Rollback: boardsApi.moveCard updated to accept AbortSignal. useMoveCard hook (applyMoveOptimistic pure function + TanStack Query useMutation onMutate/onError/onSettled pattern with AbortController cancel-previous). BoardView wired with DndContext, SortableContext per column, DragOverlay, PointerSensor(distance:4) + KeyboardSensor. Column uses useDroppable for empty-column drop targets. CardTile wired with useSortable (listeners on drag handle, isDragging for visual feedback). computeNewPosition helper calculates midpoint integer positions. 6 new dnd.test.tsx tests (applyMoveOptimistic cross-column, badge counts, no-op on missing card; useMoveCard optimistic update, rollback, toast on error). 29/29 tests PASS. tsc+lint+build PASS. |
 | 2026-05-18 | TASK-003 Kanban Board UI | BUILD Phase 3/5 COMPLETE | Frontend BoardView + Card Rendering: dnd-kit + sonner installed. boardsApi.ts (fetchBoards/fetchBoard/createCard/moveCard). useBoards/useBoard hooks. BoardView (DndContext placeholder, loading skeleton, error panel, empty-column state), Column (sticky header, card-count badge, AddCardForm slot), CardTile (title, desc preview, due date, label chips, drag-handle, click-to-card-detail), AddCardForm (Trello-style inline expand). Sidebar replaced placeholderBoards with useBoards(). CardDetailPlaceholderPage + /boards/:boardId/cards/:cardId route. Toaster (sonner) added to main.tsx. Label color palette added to tailwind.config.ts. 23/23 frontend tests pass (9 new boardView tests, updated routes+AppShell tests). tsc+lint+build all PASS. |
@@ -56,5 +58,14 @@ See task archives below for completed tasks.
 **Status**: ✅ ARCHIVED
 **Date**: 2026-05-19
 **Archive**: `memory-bank/archive/archive-TASK-003.md`
+
+---
+
+## Task Archive: TASK-004
+
+**Task**: Card Detail Modal + Search/Filter
+**Status**: ✅ ARCHIVED
+**Date**: 2026-05-19
+**Archive**: `memory-bank/archive/archive-TASK-004.md`
 
 ---

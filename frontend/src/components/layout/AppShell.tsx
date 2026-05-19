@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { useSidebar } from '../../hooks/useSidebar';
 import { Sidebar } from './Sidebar';
-import { BoardHeader } from './BoardHeader';
+import { GenericTopBar } from './GenericTopBar';
 
 export function AppShell() {
   const { isOpen, close, toggle } = useSidebar();
@@ -17,7 +17,7 @@ export function AppShell() {
       )}
       <Sidebar id="sidebar" isOpen={isOpen} onClose={close} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <BoardHeader onMenuClick={toggle} />
+        <GenericTopBar onMenuClick={toggle} />
         <main className="flex-1 overflow-auto">
           <Outlet />
         </main>

@@ -7,9 +7,10 @@ interface ColumnProps {
   column: ColumnType;
   boardId: string;
   onAddCard: (columnId: string, title: string) => Promise<void>;
+  isFiltering?: boolean;
 }
 
-export function Column({ column, boardId, onAddCard }: ColumnProps) {
+export function Column({ column, boardId, onAddCard, isFiltering }: ColumnProps) {
   const { setNodeRef } = useDroppable({ id: column.id });
 
   return (
@@ -40,7 +41,7 @@ export function Column({ column, boardId, onAddCard }: ColumnProps) {
                        text-text-disabled text-sm text-center
                        mx-2 my-1"
           >
-            No cards yet
+            {isFiltering ? 'No matching cards' : 'No cards yet'}
           </div>
         ) : (
           column.cards.map((card) => (
