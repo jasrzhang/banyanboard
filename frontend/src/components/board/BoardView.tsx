@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import {
   DndContext,
   DragOverlay,
@@ -105,8 +106,9 @@ export function BoardView({ boardId }: BoardViewProps) {
     moveCardMutation({ cardId: draggedCardId, fromColumnId, toColumnId, position: newPosition });
   };
 
-  const handleAddCard = (columnId: string, title: string) =>
-    createCardMutation({ columnId, title });
+  const handleAddCard = async (columnId: string, title: string): Promise<void> => {
+    await createCardMutation({ columnId, title });
+  };
 
   const activeCard = board && activeCardId ? findCardById(board, activeCardId) : null;
 
@@ -142,30 +144,33 @@ export function BoardView({ boardId }: BoardViewProps) {
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div
-        className="flex flex-row gap-3 h-full px-4 py-4 overflow-x-auto"
-        aria-label="Kanban board columns"
-        role="region"
+    <>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
       >
-        {board.columns.map((column) => (
-          <SortableContext
-            key={column.id}
-            items={column.cards.map((c) => c.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <Column column={column} boardId={boardId} onAddCard={handleAddCard} />
-          </SortableContext>
-        ))}
-        <DragOverlay>
-          {activeCard ? <CardTile card={activeCard} boardId={boardId} isDragOverlay /> : null}
-        </DragOverlay>
-      </div>
-    </DndContext>
+        <div
+          className="flex flex-row gap-3 h-full px-4 py-4 overflow-x-auto"
+          aria-label="Kanban board columns"
+          role="region"
+        >
+          {board.columns.map((column) => (
+            <SortableContext
+              key={column.id}
+              items={column.cards.map((c) => c.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <Column column={column} boardId={boardId} onAddCard={handleAddCard} />
+            </SortableContext>
+          ))}
+          <DragOverlay>
+            {activeCard ? <CardTile card={activeCard} boardId={boardId} isDragOverlay /> : null}
+          </DragOverlay>
+        </div>
+      </DndContext>
+      <Outlet />
+    </>
   );
 }

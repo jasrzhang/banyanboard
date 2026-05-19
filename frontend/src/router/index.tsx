@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
 import { BoardListPage } from '../pages/BoardListPage';
 import { BoardDetailPage } from '../pages/BoardDetailPage';
-import { CardDetailPlaceholderPage } from '../pages/CardDetailPlaceholderPage';
+import { CardDetailModal } from '../components/card/CardDetailModal';
 
 export const routes = [
   {
@@ -11,8 +11,13 @@ export const routes = [
     children: [
       { index: true, element: <Navigate to="/boards" replace /> },
       { path: 'boards', element: <BoardListPage /> },
-      { path: 'boards/:boardId', element: <BoardDetailPage /> },
-      { path: 'boards/:boardId/cards/:cardId', element: <CardDetailPlaceholderPage /> },
+      {
+        path: 'boards/:boardId',
+        element: <BoardDetailPage />,
+        children: [
+          { path: 'cards/:cardId', element: <CardDetailModal /> },
+        ],
+      },
     ],
   },
 ];
