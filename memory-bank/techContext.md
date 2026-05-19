@@ -150,6 +150,7 @@ npm run format --prefix frontend
 - PostgreSQL 15 — relational database for boards, columns, cards, users
 - **node-postgres (`pg`) v8** — database client; raw SQL with typed query results
 - **node-pg-migrate v7** — schema versioning and migrations (CLI: `npm run migrate --prefix backend`)
+- **Zod v3** — request body validation in backend controllers/routes (FEAT-003, Phase 2)
 
 ### API & Communication
 

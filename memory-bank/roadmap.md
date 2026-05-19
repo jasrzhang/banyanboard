@@ -2,7 +2,7 @@
 
 ## Summary
 - **Total Features**: 4
-- **Complete Features**: 2 (FEAT-001, FEAT-002)
+- **Complete Features**: 3 (FEAT-001, FEAT-002, FEAT-003)
 - **Released Versions**: 0
 - **Active Versions**: 0
 - **Planning Versions**: 2
@@ -67,13 +67,14 @@
 
 ### FEAT-003: Kanban Board UI
 - **Version**: v0.2.0
-- **Status**: planned
+- **Status**: complete
 - **Priority**: high
 - **Complexity**: Level 4
 - **Description**: Full Kanban board rendering: fetch and display columns with card tiles (title, description preview, due date, labels), drag-and-drop between columns using dnd-kit with optimistic UI updates via TanStack Query mutations, column card-count badge, add-card affordance per column, and sticky column headers. Integrates with the board/column/card REST API from v0.1.0 backend.
-- **Linked Tasks**: None
-- **Branch**: feature/FEAT-003-kanban-board-ui
+- **Linked Tasks**: TASK-003 (complete)
+- **Branch**: feature/FEAT-003-kanban-board-ui (merged 2026-05-19)
 - **Created**: 2026-05-16
+- **Completed**: 2026-05-19
 
 ---
 

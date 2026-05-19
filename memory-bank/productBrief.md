@@ -17,6 +17,9 @@
 - Drag-and-drop cards between columns
 - Multiple boards per team
 - Label-based filtering and organization
+- Search cards by title; filter by label or due date
+- Card detail modal for full task inspection and editing
+- Horizontally scrollable board layout with sidebar navigation
 
 ## Markets Serviced
 
@@ -46,6 +49,8 @@
 | Persona | Role | Goals |
 |---------|------|-------|
 | Freelancer | Solo operator managing multiple client boards | Keep client work separated; track deliverables per project |
+| Startup Founder | Early-stage founder wearing many hats | Lightweight product/ops tracking without enterprise overhead; fast to spin up |
+| Solo Builder | Independent developer or maker | Organize personal project work; minimal learning curve; no seat-cost friction |
 
 ### Administrators/Operators
 
@@ -61,6 +66,43 @@
   - Daily standup: team opens board, reviews In Progress column, moves cards
   - Sprint planning: team creates cards in To Do, assigns labels and due dates
   - Retrospective: team reviews Done column count for the period
+
+## UI / UX Design Language
+
+### Inspiration
+Linear, Notion, Trello, simplified Jira — calm, productivity-focused, modern workspace aesthetic.
+
+### Visual Style
+- Light neutral background; white cards and panels
+- Subtle shadows, rounded corners, and consistent spacing for depth without clutter
+- Modern sans-serif typography
+- Muted accent colors for labels and status chips (high contrast, strongly readable)
+- Spacious layouts emphasizing clarity over density
+
+### Application Layout
+| Zone | Content |
+|------|---------|
+| Left Sidebar | Navigation: available boards, workspace actions |
+| Board Header | Board title, search/filter controls, "New Card" primary action |
+| Board Area | Horizontally scrollable Kanban columns |
+
+### Column Structure
+- Column title + card count badge
+- Add-card action area at column bottom
+- Sticky column header on vertical scroll (optional)
+- Supports drag-and-drop card reordering
+
+### Card Design
+- Compact panel: title, description preview, due date, colored label chips
+- Hover state with subtle shadow lift transition
+- Click opens full-detail modal (inspect + edit)
+
+### Responsive Breakpoints
+| Breakpoint | Behavior |
+|------------|----------|
+| Desktop (≥1024px) | Full layout: visible sidebar + multiple columns |
+| Tablet (768–1023px) | Horizontal board scrolling; sidebar may collapse |
+| Mobile (<768px) | Post-MVP enhancement; not in scope for initial build |
 
 ## Success Metrics & KPIs
 
@@ -184,6 +226,34 @@
 - Clean architecture — layered (controllers → services → repositories) but no clever abstractions; favor readability
 - No real-time sync (WebSockets) in MVP — page refresh or polling acceptable
 
+### Frontend Stack
+
+| Layer | Technology | Notes |
+|-------|-----------|-------|
+| Framework | React + TypeScript | Vite as build tool |
+| Styling | TailwindCSS | Utility-first; no custom CSS frameworks |
+| Server state | TanStack Query (React Query) | API data fetching and caching |
+| Global state | Zustand or React Context | Choose based on implementation simplicity |
+| Drag-and-drop | dnd-kit (preferred) or react-beautiful-dnd | Proven library; no hand-rolled DnD |
+
+### Frontend Architecture
+
+Components organized by responsibility:
+
+```
+src/
+├── components/
+│   ├── layout/       # Sidebar, BoardHeader, AppShell
+│   ├── board/        # BoardView, Column, ColumnHeader
+│   ├── card/         # CardTile, CardModal, CardForm
+│   ├── filters/      # SearchBar, LabelFilter, DateFilter
+│   └── ui/           # Reusable primitives (Button, Badge, Modal, etc.)
+├── hooks/            # Custom hooks (useBoard, useCards, useDragDrop)
+├── api/              # Type-safe API client layer
+├── store/            # Global state (Zustand stores or Context)
+└── types/            # Shared TypeScript types
+```
+
 ### Assumptions
 
 - Teams using BanyanBoard have a developer who can run Docker Compose
@@ -194,15 +264,32 @@
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|------------|--------|------------|
-| Drag-and-drop UX is hard to get right | Medium | High | Use a proven DnD library (react-beautiful-dnd or dnd-kit) |
+| Drag-and-drop UX is hard to get right | Medium | High | Use dnd-kit (preferred) or react-beautiful-dnd; no hand-rolled DnD |
 | Schema migrations break existing data | Medium | High | Use a migration tool (e.g., node-postgres-migrate or Flyway) from day one |
 | Scope creep beyond simple Kanban | High | Medium | Strict MVP gate — features not in productBrief require a roadmap entry |
+| Component sprawl without clear boundaries | Medium | Medium | Enforce component-by-responsibility folder structure from day one |
+| TailwindCSS purge misconfiguration ships dead CSS | Low | Low | Verify PurgeCSS/content paths in Vite config before first build |
+
+## Future Enhancements (Post-MVP)
+
+- Dark mode
+- Real-time collaboration (WebSocket sync)
+- Activity history / audit log
+- User avatars
+- In-app notifications
+- Keyboard shortcuts
+- Board templates
+- Card comments and file attachments
+- Mobile drag-and-drop (touch events)
+- JSON board export / import
 
 ## Open Questions
 
 - [ ] Authentication: JWT (stateless) or session cookies (simpler)? Decide before auth implementation
 - [ ] Column ordering: fixed (To Do / In Progress / Done) or user-customizable in MVP?
 - [ ] Card ordering within columns: manual drag-order preserved, or last-updated sort?
+- [ ] Global state: Zustand vs React Context? Evaluate during Phase 1 build based on state complexity
+- [ ] Sidebar collapse behaviour on tablet: hidden by default, or icon-only rail?
 
 ## Document History
 
@@ -210,7 +297,8 @@
 |------|--------|---------|
 | 2026-05-16 | /banyan-init | Initial creation |
 | 2026-05-16 | User | Populated with BanyanBoard context — Kanban board for small teams |
+| 2026-05-16 | User | Frontend supplement: design language, layout, component architecture, tech stack |
 
 ## Last Refreshed
 
-2026-05-16
+2026-05-16 (frontend supplement applied)

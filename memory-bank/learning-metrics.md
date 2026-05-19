@@ -15,20 +15,24 @@
 |---------|------|--------------------:|-------------:|-------------:|
 | TASK-001 | 2026-05-16 | 4 | 0 | 4 |
 | TASK-002 | 2026-05-18 | 4 | 1 | 2 |
+| TASK-003 | 2026-05-19 | 4 | 2 | 2 |
 
 ## Rule Effectiveness
 
 | File | Topics | Evidence Count | Priority | Last Updated |
 |------|--------|---------------:|:--------:|:------------:|
-| architecture.md | architecture, typescript | 1 | low | 2026-05-16 |
+| architecture.md | architecture, typescript, utility-extraction | 2 | low | 2026-05-19 |
 | testing-patterns.md | testing-patterns, eslint, zustand | 2 | low | 2026-05-18 |
-| error-handling.md | error-handling, shutdown | 1 | low | 2026-05-16 |
+| error-handling.md | error-handling, shutdown, abort-error | 2 | low | 2026-05-19 |
 | observability.md | observability, logging | 1 | low | 2026-05-16 |
 | toolchain-setup.md | toolchain-setup, vitest, npm, frontend | 1 | low | 2026-05-18 |
 | state-architecture.md | state-architecture, react, zustand | 1 | low | 2026-05-18 |
+| optimistic-updates.md | optimistic-updates, tanstack-query, frontend | 1 | low | 2026-05-19 |
+| data-access.md | data-access, postgresql, repositories | 1 | low | 2026-05-19 |
 
 ## Consolidation History
 
 | Date | Rules Before | Rules After | Merged | Expired | Promoted |
 |------|------------:|------------:|-------:|--------:|---------:|
 | 2026-05-18 | 6 | 6 | 0 | 0 | 0 |
+| 2026-05-19 | 8 | 8 | 0 | 0 | 0 |
