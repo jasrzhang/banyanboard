@@ -59,3 +59,16 @@ Chronological record of pattern extraction and consolidation events from task re
 - Expired: 0 bullets (0 files deleted)
 - Promoted: 0 files to medium priority
 - Pruned: 0 excess bullets
+
+---
+
+## 2026-05-19 - TASK-004 Reflection
+
+### Extracted Patterns
+- **ui-patterns** → created `agent-rules/_learned/ui-patterns.md` (evidence count: 1) — Use `within(container)` for RTL query scoping to ARIA groups
+- **testing-patterns** → amended `agent-rules/_learned/testing-patterns.md` (evidence count: 3) — Route-rendered modal test harness: MemoryRouter + Routes + Route + outlet shell
+- **state-architecture** → amended `agent-rules/_learned/state-architecture.md` (evidence count: 2) — Component-scoped `useState` preferred over Zustand for board-scoped transient UI state
+- **architecture** → amended `agent-rules/_learned/architecture.md` (evidence count: 3) — Discriminated union for mutually exclusive filter modes vs `Set<string>`
+
+### systemPatterns.md Updates
+- None (patterns are frontend-specific coding practices, not system-level architecture patterns)
