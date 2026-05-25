@@ -4,6 +4,10 @@ import type { UpdateCardInput } from '../schemas/cardSchemas.js';
 export class CardService {
   constructor(private readonly cardRepo: CardRepository) {}
 
+  async getCardContext(cardId: string): Promise<{ columnId: string; boardId: string; title: string } | null> {
+    return this.cardRepo.getContext(cardId);
+  }
+
   async updateCard(cardId: string, input: UpdateCardInput): Promise<CardRow | null> {
     const exists = await this.cardRepo.exists(cardId);
     if (!exists) return null;

@@ -89,6 +89,9 @@ export const config = Object.freeze({
   cards: {
     positionGap: optionalIntEnv('CARD_POSITION_GAP', 1000),
   },
+  sse: {
+    heartbeatIntervalMs: optionalIntEnv('SSE_HEARTBEAT_INTERVAL_MS', 25000),
+  },
 });
 
 export type Config = typeof config;

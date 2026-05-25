@@ -13,4 +13,10 @@ export class ColumnService {
     if (!columnExists) return null;
     return this.cardRepo.create(columnId, input.title, input.description, input.dueDate);
   }
+
+  async getColumnInfo(columnId: string): Promise<{ boardId: string; name: string } | null> {
+    const col = await this.columnRepo.findById(columnId);
+    if (!col) return null;
+    return { boardId: col.boardId, name: col.name };
+  }
 }

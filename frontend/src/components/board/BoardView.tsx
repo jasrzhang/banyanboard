@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
 import {
   DndContext,
@@ -25,6 +25,7 @@ import { CardTile } from '../card/CardTile';
 import { BoardErrorPanel } from './BoardErrorPanel';
 import { ColumnSkeleton } from '../card/CardSkeleton';
 import { BoardHeader } from './BoardHeader';
+import { ActivityFeedPanel } from '../activity/ActivityFeedPanel';
 import { filterCards } from '../../utils/filterCards';
 
 interface BoardViewProps {
@@ -79,6 +80,9 @@ export function BoardView({ boardId }: BoardViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLabelIds, setActiveLabelIds] = useState<string[]>([]);
   const [activeDateFilter, setActiveDateFilter] = useState<'none' | 'overdue' | 'due-soon'>('none');
+  const [activityOpen, setActivityOpen] = useState(false);
+
+  const activityToggleRef = useRef<HTMLButtonElement>(null);
 
   const { data: board, isLoading, isError, error, refetch } = useBoard(boardId);
   const { mutate: moveCardMutation } = useMoveCard(boardId);
@@ -131,6 +135,11 @@ export function BoardView({ boardId }: BoardViewProps) {
     setActiveLabelIds([]);
     setActiveDateFilter('none');
   };
+
+  const closeActivityPanel = useCallback(() => {
+    setActivityOpen(false);
+    activityToggleRef.current?.focus();
+  }, []);
 
   const allLabels = useMemo<Label[]>(() => {
     if (!board) return [];
@@ -204,39 +213,47 @@ export function BoardView({ boardId }: BoardViewProps) {
         onLabelToggle={toggleLabel}
         onDateFilterChange={toggleDateFilter}
         onClearFilters={clearFilters}
+        activityOpen={activityOpen}
+        onActivityToggle={() => setActivityOpen((prev) => !prev)}
+        activityToggleRef={activityToggleRef}
       />
-      <div className="flex-1 overflow-hidden relative">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <div
-            className="flex flex-row gap-3 h-full px-4 py-4 overflow-x-auto"
-            aria-label="Kanban board columns"
-            role="region"
+      <div className="flex flex-row flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden relative">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
           >
-            {filteredColumns.map((filteredColumn) => (
-              <SortableContext
-                key={filteredColumn.id}
-                items={filteredColumn.cards.map((c) => c.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <Column
-                  column={filteredColumn}
-                  boardId={boardId}
-                  onAddCard={handleAddCard}
-                  isFiltering={hasActiveFilters}
-                />
-              </SortableContext>
-            ))}
-            <DragOverlay>
-              {activeCard ? <CardTile card={activeCard} boardId={boardId} isDragOverlay /> : null}
-            </DragOverlay>
-          </div>
-        </DndContext>
-        <Outlet />
+            <div
+              className="flex flex-row gap-3 h-full px-4 py-4 overflow-x-auto"
+              aria-label="Kanban board columns"
+              role="region"
+            >
+              {filteredColumns.map((filteredColumn) => (
+                <SortableContext
+                  key={filteredColumn.id}
+                  items={filteredColumn.cards.map((c) => c.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <Column
+                    column={filteredColumn}
+                    boardId={boardId}
+                    onAddCard={handleAddCard}
+                    isFiltering={hasActiveFilters}
+                  />
+                </SortableContext>
+              ))}
+              <DragOverlay>
+                {activeCard ? <CardTile card={activeCard} boardId={boardId} isDragOverlay /> : null}
+              </DragOverlay>
+            </div>
+          </DndContext>
+          <Outlet />
+        </div>
+        {activityOpen && (
+          <ActivityFeedPanel boardId={boardId} onClose={closeActivityPanel} />
+        )}
       </div>
     </div>
   );
