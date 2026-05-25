@@ -1,12 +1,16 @@
 import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import type { ColumnService } from '../services/ColumnService.js';
+import type { ActivityService } from '../services/ActivityService.js';
 import { CreateCardSchema } from '../schemas/cardSchemas.js';
 
 const uuidParam = z.string().uuid();
 
 export class ColumnController {
-  constructor(private readonly service: ColumnService) {}
+  constructor(
+    private readonly service: ColumnService,
+    private readonly activityService: ActivityService,
+  ) {}
 
   createCard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -39,6 +43,21 @@ export class ColumnController {
       }
 
       res.status(201).json(card);
+
+      // Fire activity event after responding (fire-and-forget)
+      void this.service.getColumnInfo(parsedId.data)
+        .then((colInfo) => {
+          if (!colInfo) return;
+          return this.activityService.recordEvent({
+            boardId: colInfo.boardId,
+            cardId: card.id,
+            eventType: 'card_created',
+            payload: { cardTitle: card.title, columnName: colInfo.name },
+          });
+        })
+        .catch((err: unknown) => {
+          req.logger.warn('card_created activity hook failed', { cardId: card.id, err });
+        });
     } catch (err) {
       next(err);
     }

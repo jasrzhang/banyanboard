@@ -142,4 +142,17 @@ export class CardRepository {
     );
     return parseInt(result.rows[0]!.count, 10) > 0;
   }
+
+  async getContext(cardId: string): Promise<{ id: string; columnId: string; boardId: string; title: string } | null> {
+    const result = await this.pool.query<{ id: string; column_id: string; board_id: string; title: string }>(
+      `SELECT c.id, c.column_id, col.board_id, c.title
+       FROM cards c
+       JOIN columns col ON col.id = c.column_id
+       WHERE c.id = $1`,
+      [cardId],
+    );
+    if (!result.rows[0]) return null;
+    const r = result.rows[0];
+    return { id: r.id, columnId: r.column_id, boardId: r.board_id, title: r.title };
+  }
 }

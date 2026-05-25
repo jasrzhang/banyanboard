@@ -37,6 +37,16 @@ export class ColumnRepository {
     return parseInt(result.rows[0]!.count, 10) > 0;
   }
 
+  async findById(columnId: string): Promise<ColumnRow | null> {
+    const result = await this.pool.query<{ id: string; board_id: string; name: string; position: number }>(
+      'SELECT id, board_id, name, position FROM columns WHERE id = $1',
+      [columnId],
+    );
+    if (!result.rows[0]) return null;
+    const r = result.rows[0];
+    return { id: r.id, boardId: r.board_id, name: r.name, position: r.position };
+  }
+
   async createDefaultsForBoard(boardId: string, client: PoolClient): Promise<void> {
     for (const col of DEFAULT_COLUMNS) {
       await client.query(

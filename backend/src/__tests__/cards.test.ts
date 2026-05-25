@@ -1,9 +1,10 @@
-// Integration tests for Cards API endpoints (POST card, PATCH card move).
+// Integration tests for Cards API endpoints (POST card, PATCH card move, activity hooks).
 // Requires a running PostgreSQL instance (docker compose up -d db).
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app.js';
 import { pool } from '../config/db.js';
+import { ActivityRepository } from '../repositories/ActivityRepository.js';
 
 describe('Cards API', () => {
   const app = createApp();
@@ -39,7 +40,6 @@ describe('Cards API', () => {
 
   afterAll(async () => {
     await pool.query('DELETE FROM boards WHERE id = $1', [boardId]);
-    await pool.end();
   });
 
   describe('POST /api/columns/:columnId/cards', () => {
@@ -142,6 +142,56 @@ describe('Cards API', () => {
         .patch(`/api/cards/${existingCardId}`)
         .send({ columnId: 'not-a-uuid', position: 1000 });
       expect(res.status).toBe(400);
+    });
+  });
+
+  // ── Activity event hooks ───────────────────────────────────────────────────
+
+  describe('Activity event hooks', () => {
+    it('card create (POST /api/columns/:id/cards) writes a card_created activity row', async () => {
+      const activityRepo = new ActivityRepository(pool);
+
+      const res = await request(app)
+        .post(`/api/columns/${columnId}/cards`)
+        .send({ title: 'Activity Hook Card' });
+      expect(res.status).toBe(201);
+
+      const createdCardId: string = res.body.id;
+
+      // Allow the fire-and-forget recordEvent to complete
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const events = await activityRepo.findByBoardId(boardId);
+      const hook = events.find(
+        (e) => e.eventType === 'card_created' && e.cardId === createdCardId,
+      );
+      expect(hook).toBeDefined();
+      expect(hook?.boardId).toBe(boardId);
+      expect((hook?.payload as Record<string, unknown>)['cardTitle']).toBe('Activity Hook Card');
+    });
+
+    it('card move (PATCH /api/cards/:id with new columnId) writes a card_moved activity row', async () => {
+      const activityRepo = new ActivityRepository(pool);
+
+      // Reset existingCard to columnId first so we know the before-state
+      await request(app)
+        .patch(`/api/cards/${existingCardId}`)
+        .send({ columnId, position: 3000 });
+
+      const res = await request(app)
+        .patch(`/api/cards/${existingCardId}`)
+        .send({ columnId: column2Id, position: 1000 });
+      expect(res.status).toBe(200);
+
+      // Allow the fire-and-forget recordEvent to complete
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const events = await activityRepo.findByBoardId(boardId);
+      const hook = events.find(
+        (e) => e.eventType === 'card_moved' && e.cardId === existingCardId,
+      );
+      expect(hook).toBeDefined();
+      expect(hook?.boardId).toBe(boardId);
     });
   });
 });
