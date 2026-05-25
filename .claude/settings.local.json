@@ -15,7 +15,12 @@
       "Bash(node -e \"import\\('zod'\\).then\\(m => console.log\\('zod ok:', m.z.string\\(\\).parse\\('test'\\)\\)\\)\")",
       "Bash(docker compose *)",
       "Bash(npx tsc *)",
-      "Bash(node_modules/.bin/tsc --noEmit)"
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Skill(banyan-memory-bank:banyan-roadmap)",
+      "Bash(not exist *)",
+      "PowerShell(echo $env:PROMPT)",
+      "PowerShell(Get-Command *)",
+      "Bash(bash \"C:/Users/Shruiz/.claude/statusline-command.sh\")"
     ]
   }
 }
