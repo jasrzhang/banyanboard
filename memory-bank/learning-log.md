@@ -93,3 +93,13 @@ Chronological record of pattern extraction and consolidation events from task re
 
 ### systemPatterns.md Updates
 - None (SSE patterns are coding practices; singleton pattern is an extension of the existing `pool` precedent already documented; event-hook placement is technical debt, not a positive pattern to codify)
+
+---
+
+## 2026-05-25 - Consolidation (during TASK-005 archive)
+
+- Files before: 10, Files after: 10
+- Merged: 0 files (no >50% topic overlap found)
+- Expired: 0 bullets (all learnings from 2026-05-16 to 2026-05-25, well within 90-day window)
+- Promoted: 0 files (sse.md at ec:2, below threshold of 3; architecture.md already at medium)
+- Pruned: 0 excess bullets (max file has 5 bullets, below 15-bullet limit)

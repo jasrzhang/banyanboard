@@ -71,3 +71,12 @@ See task archives below for completed tasks.
 **Archive**: `memory-bank/archive/archive-TASK-004.md`
 
 ---
+
+## Task Archive: TASK-005
+
+**Task**: Realtime Activity Feed
+**Status**: ✅ ARCHIVED
+**Date**: 2026-05-25
+**Archive**: `memory-bank/archive/archive-TASK-005.md`
+
+---
