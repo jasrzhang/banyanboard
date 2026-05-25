@@ -6,3 +6,4 @@
 | TASK-002 | Frontend Foundation | ARCHIVE | COMPLETE | FEAT-002 |
 | TASK-003 | Kanban Board UI | ARCHIVE | COMPLETE | FEAT-003 |
 | TASK-004 | Card Detail Modal + Search/Filter | ARCHIVE | COMPLETE | FEAT-004 |
+| TASK-005 | Realtime Activity Feed | BUILD | Phase 1/3 COMPLETE | FEAT-005 |

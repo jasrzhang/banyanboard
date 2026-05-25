@@ -2,16 +2,23 @@
 
 This file documents the architectural patterns, design patterns, and system structure used in this project.
 
+## Domain Event Pattern
+
+Card actions (create, move, label, assign, delete) emit domain events.
+Consumers subscribe to event streams rather than polling.
+Events: timestamp, actor, action type, card ID, before/after state.
+In-process emitter for v1; design for future message bus.
+
 ## Guiding Principles
 
-| Principle | Description |
-|-----------|-------------|
-| Clean Architecture | Controllers → Services → Repositories. No business logic in route handlers. No database calls in controllers. |
-| Simplicity over Cleverness | Prefer explicit, readable code. Avoid patterns that require explanation to understand. |
-| No Premature Abstractions | Don't create a shared abstraction until there are 3+ concrete implementations. Three similar functions are better than one over-generalized helper. |
-| 12-Factor Config | All environment-specific values (DB URL, port, JWT secret) via environment variables. No hardcoded config in source. Fail fast at startup if required values are missing. |
-| Graceful Shutdown | All services handle SIGTERM and SIGINT to shut down cleanly (critical for container orchestration). Connections close, in-flight requests complete, process exits. |
-| Optimistic UI | Card drag-and-drop updates the UI immediately, then confirms with the server. Rollback on error. |
+| Principle                  | Description                                                                                                                                                               |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Clean Architecture         | Controllers → Services → Repositories. No business logic in route handlers. No database calls in controllers.                                                             |
+| Simplicity over Cleverness | Prefer explicit, readable code. Avoid patterns that require explanation to understand.                                                                                    |
+| No Premature Abstractions  | Don't create a shared abstraction until there are 3+ concrete implementations. Three similar functions are better than one over-generalized helper.                       |
+| 12-Factor Config           | All environment-specific values (DB URL, port, JWT secret) via environment variables. No hardcoded config in source. Fail fast at startup if required values are missing. |
+| Graceful Shutdown          | All services handle SIGTERM and SIGINT to shut down cleanly (critical for container orchestration). Connections close, in-flight requests complete, process exits.        |
+| Optimistic UI              | Card drag-and-drop updates the UI immediately, then confirms with the server. Rollback on error.                                                                          |
 
 ## System Architecture
 
@@ -37,9 +44,10 @@ All services orchestrated via Docker Compose for local development.
 
 - **React Frontend**: Renders boards, columns, and cards. Handles drag-and-drop interactions. Calls REST API. No business logic beyond UI state.
 - **Express Backend**: Routes → Controllers → Services → Repositories. Validates input, enforces auth, delegates to service layer.
-- **Service Layer**: Business logic — e.g., column ordering, due date validation, label management.
-- **Repository Layer**: SQL queries via `pg`. One repository per domain entity (BoardRepository, ColumnRepository, CardRepository).
-- **PostgreSQL**: Source of truth for all boards, columns, cards, users, and labels.
+- **Service Layer**: Business logic — e.g., column ordering, due date validation, label management, activity event recording.
+- **Repository Layer**: SQL queries via `pg`. One repository per domain entity (BoardRepository, ColumnRepository, CardRepository, ActivityRepository).
+- **ActivityEventEmitter**: In-process typed event bus for activity events. Decouples event producers (controllers) from consumers (SSE route, future subscribers).
+- **PostgreSQL**: Source of truth for all boards, columns, cards, users, labels, and activity events.
 
 ### Data Flow Patterns
 
@@ -115,6 +123,34 @@ JSON response → React renders columns and cards
 - **Trade-offs**: pino is synchronous to a custom stream (testable); `Logger` interface keeps OTel SDK wiring mechanical in future
 - **Key constraint**: `no-console: error` ESLint rule forces all production logging through the Logger interface
 
+### ActivityEventEmitter Wrapper Pattern — In-Process Event Bus
+
+- **Problem**: Extending Node.js `EventEmitter` in TypeScript causes `noImplicitOverride` conflicts on inherited method signatures; also needs `setMaxListeners(0)` for unbounded SSE subscriber counts.
+- **Implementation**: `ActivityEventEmitter` holds a private inner `EventEmitter` instance and re-exposes `on/off/emit` as typed methods. `setMaxListeners(0)` called in constructor. Exported as `activityEmitter` singleton from `src/events/ActivityEventEmitter.ts`.
+- **Trade-offs**: One extra indirection layer; avoids TypeScript override friction and keeps the API fully typed.
+- **Example**: `backend/src/events/ActivityEventEmitter.ts`
+
+### Fire-and-Forget Activity Hooks — Non-Blocking Event Emission
+
+- **Problem**: Activity recording (DB write + in-process emit) must never delay the HTTP response to the client.
+- **Implementation**: Controllers call `activityService.recordEvent()` *after* `res.json()` via `void promise.catch(logger.error)`. No `await`; errors are logged but don't propagate to the response.
+- **Trade-offs**: Event emission is best-effort — a DB failure will log an error but the card operation has already succeeded. This is intentional for MVP resilience.
+- **Example**: `backend/src/controllers/ColumnController.ts` (card_created), `backend/src/controllers/CardController.ts` (card_moved / card_updated)
+
+### Pre-Update Context Capture — Semantic Event Typing
+
+- **Problem**: To distinguish `card_moved` from `card_updated`, the controller needs the card's previous `columnId` before the PATCH is applied.
+- **Implementation**: `CardController.updateCard()` calls `cardService.getCardContext(id)` before delegating to `cardService.updateCard()`. The before/after `columnId` comparison determines which event type to emit.
+- **Trade-offs**: One extra DB read per card update. Acceptable for MVP; can be eliminated later with a returning-clause or optimistic diff.
+- **Example**: `backend/src/controllers/CardController.ts`
+
+### activityService Singleton Export — Cross-Route DI Without Circular Imports
+
+- **Problem**: `ColumnController` and `CardController` both need `activityService`, but each lives in its own route module. Re-instantiating creates divergent emitter instances; importing from the controller module risks circular dependencies.
+- **Implementation**: `src/routes/activity.ts` creates the `activityService` singleton and exports it by name. `src/routes/columns.ts` and `src/routes/cards.ts` import it from the activity route module. No class-level DI container needed.
+- **Trade-offs**: Route modules gain a mild coupling to each other; acceptable at MVP scale. Eliminates the need for a DI framework.
+- **Example**: `backend/src/routes/activity.ts` (export), `backend/src/routes/columns.ts` + `cards.ts` (import)
+
 ## Integration Patterns
 
 [To be documented as integrations are built — no external integrations in MVP]
@@ -146,6 +182,7 @@ JSON response → React renders columns and cards
 - **What is NOT tested**: Docker healthcheck timing (environmental/non-deterministic), TypeScript compilation (covered by `tsc --noEmit`), ESLint rule configuration itself, third-party library internals (express routing, pg driver)
 
 <!-- AUTO-MANAGED: c4-architecture-start -->
+
 ## C4 Architecture
 
 <!--

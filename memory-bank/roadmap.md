@@ -85,7 +85,7 @@
 - **Priority**: medium
 - **Complexity**: Level 3
 - **Description**: Track and display a realtime activity feed — capture board events (card created, moved, updated, deleted) and surface them in a live-updating feed panel. Requires decisions on realtime transport (WebSocket vs SSE vs polling), activity event schema, and feed UI/UX.
-- **Linked Tasks**: None
+- **Linked Tasks**: TASK-005 (planning)
 - **Branch**: feature/FEAT-005-realtime-activity-feed
 - **Created**: 2026-05-25
 

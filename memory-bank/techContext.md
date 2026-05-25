@@ -152,10 +152,34 @@ npm run format --prefix frontend
 - **node-pg-migrate v7** — schema versioning and migrations (CLI: `npm run migrate --prefix backend`)
 - **Zod v3** — request body validation in backend controllers/routes (FEAT-003, Phase 2)
 
+**Database Schema — key tables:**
+
+| Table | PK | Notable columns |
+|---|---|---|
+| `boards` | uuid | name, created_at |
+| `columns` | uuid | board_id (FK), name, position |
+| `cards` | uuid | column_id (FK), title, position, description |
+| `activity_events` | uuid | board_id (FK CASCADE), card_id (FK SET NULL), event_type text, payload jsonb, created_at timestamptz |
+
+`activity_events` has a composite index on `(board_id, created_at DESC)` for efficient feed queries. Migration: `1747600005000_create-activity-events.js`.
+
 ### API & Communication
 
 - REST API — TypeScript/Express, JSON payloads
 - No WebSockets in MVP — card state refreshed on action or manual reload
+
+**Backend API modules (TASK-005 Phase 1):**
+
+| Module | Path | Purpose |
+|---|---|---|
+| `ActivityEventEmitter` | `src/events/ActivityEventEmitter.ts` | Typed wrapper around Node.js `EventEmitter`; singleton `activityEmitter`; `setMaxListeners(0)` for SSE fan-out |
+| `ActivityRepository` | `src/repositories/ActivityRepository.ts` | `insert()` + `findByBoardId(limit=50)` — newest-first, capped at 50 |
+| `ActivityService` | `src/services/ActivityService.ts` | `recordEvent()` (try/catch insert, always emits); `getByBoardId()` delegates to repo |
+| `ActivityController` | `src/controllers/ActivityController.ts` | `GET /api/boards/:boardId/activity` — Zod UUID validation; returns 200 array or 400 |
+| `activityRouter` | `src/routes/activity.ts` | Mounts controller; also exports `activityService` singleton for cross-route import |
+
+**REST endpoints added:**
+- `GET /api/boards/:boardId/activity` — returns last 50 activity events for a board (newest first)
 
 ### Infrastructure & Deployment
 
@@ -247,6 +271,13 @@ Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. F
   - No `console.log()` in production code (ESLint error)
   - No hardcoded config values (must use `config` object from `src/config/env.ts`)
   - DATABASE_URL required at startup (crash if missing)
+
+### 2026-05-25 — TASK-005 Phase 1: Activity feed backend core
+
+- **What Changed**: Added `activity_events` table, ActivityEventEmitter singleton, ActivityRepository, ActivityService, ActivityController, and `GET /api/boards/:boardId/activity` endpoint. Extended ColumnRepository, CardRepository, ColumnService, and CardService with context-lookup methods needed for event enrichment.
+- **Reason**: Backend foundation for realtime activity feed; emitter layer is SSE-ready without WebSockets.
+- **Impact**: Card create/move/update actions now fire typed domain events after the HTTP response completes (fire-and-forget).
+- **Migration Notes**: Run `npm run migrate --prefix backend` to apply `1747600005000_create-activity-events.js`.
 
 ### 2026-05-18 — Phase 1 TASK-002: Frontend scaffold
 
