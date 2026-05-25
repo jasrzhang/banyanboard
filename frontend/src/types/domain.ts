@@ -31,3 +31,22 @@ export interface Board {
   createdAt: string;
   updatedAt: string;
 }
+
+export type ActivityEventType = 'card_created' | 'card_moved' | 'card_updated' | 'card_deleted';
+
+export interface ActivityEventPayload {
+  cardTitle: string;
+  columnName?: string;
+  fromColumn?: string;
+  toColumn?: string;
+  changedFields?: string[];
+}
+
+export interface ActivityEvent {
+  id: string;
+  boardId: string;
+  cardId: string | null;
+  eventType: ActivityEventType;
+  payload: ActivityEventPayload;
+  createdAt: string;
+}

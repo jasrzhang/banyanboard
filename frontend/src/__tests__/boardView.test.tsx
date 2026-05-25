@@ -306,6 +306,13 @@ describe('BoardView search and filter', () => {
     expect(screen.getByRole('button', { name: /new card/i })).toBeInTheDocument();
   });
 
+  it('renders Activity toggle button with correct aria-label', () => {
+    render(<BoardViewWrapper />);
+    expect(
+      screen.getByRole('button', { name: /toggle activity feed/i }),
+    ).toBeInTheDocument();
+  });
+
   it('typing in search input hides non-matching cards', () => {
     render(<BoardViewWrapper />);
     const searchInput = screen.getByPlaceholderText('Search cards...');
