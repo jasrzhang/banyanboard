@@ -1,7 +1,7 @@
 # Product Roadmap
 
 ## Summary
-- **Total Features**: 4
+- **Total Features**: 5
 - **Complete Features**: 4 (FEAT-001, FEAT-002, FEAT-003, FEAT-004)
 - **Released Versions**: 0
 - **Active Versions**: 0
@@ -33,7 +33,8 @@
 
 ### next (Backlog)
 - **Status**: planning
-- **Features**: None
+- **Features**:
+  - FEAT-005: Realtime Activity Feed [Level 3]
 
 ---
 
@@ -75,6 +76,18 @@
 - **Branch**: feature/FEAT-003-kanban-board-ui (merged 2026-05-19)
 - **Created**: 2026-05-16
 - **Completed**: 2026-05-19
+
+---
+
+### FEAT-005: Realtime Activity Feed
+- **Version**: next
+- **Status**: planned
+- **Priority**: medium
+- **Complexity**: Level 3
+- **Description**: Track and display a realtime activity feed — capture board events (card created, moved, updated, deleted) and surface them in a live-updating feed panel. Requires decisions on realtime transport (WebSocket vs SSE vs polling), activity event schema, and feed UI/UX.
+- **Linked Tasks**: None
+- **Branch**: feature/FEAT-005-realtime-activity-feed
+- **Created**: 2026-05-25
 
 ---
 
