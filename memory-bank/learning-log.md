@@ -82,3 +82,14 @@ Chronological record of pattern extraction and consolidation events from task re
 - Expired: 0 bullets (0 files deleted)
 - Promoted: 2 files to medium priority (architecture.md, testing-patterns.md — both reached evidence_count 3)
 - Pruned: 0 excess bullets
+
+---
+
+## 2026-05-25 - TASK-005 Reflection
+
+### Extracted Patterns
+- **sse** → created `agent-rules/_learned/sse.md` (evidence count: 2) — SSE test runner hang prevention + setMaxListeners(0) for fan-out
+- **architecture** → amended `agent-rules/_learned/architecture.md` (evidence count: 5) — Module-level singleton export pattern + event hooks belong in service layer
+
+### systemPatterns.md Updates
+- None (SSE patterns are coding practices; singleton pattern is an extension of the existing `pool` precedent already documented; event-hook placement is technical debt, not a positive pattern to codify)

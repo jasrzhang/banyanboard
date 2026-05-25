@@ -17,12 +17,14 @@
 | TASK-002 | 2026-05-18 | 4 | 1 | 2 |
 | TASK-003 | 2026-05-19 | 4 | 2 | 2 |
 | TASK-004 | 2026-05-19 | 4 | 3 | 1 |
+| TASK-005 | 2026-05-25 | 4 | 1 | 1 |
 
 ## Rule Effectiveness
 
 | File | Topics | Evidence Count | Priority | Last Updated |
 |------|--------|---------------:|:--------:|:------------:|
-| architecture.md | architecture, typescript, utility-extraction | 3 | **medium** | 2026-05-19 |
+| architecture.md | architecture, typescript, utility-extraction, singleton, event-hooks | 5 | **medium** | 2026-05-25 |
+| sse.md | sse, server-sent-events, testing-patterns, realtime | 2 | low | 2026-05-25 |
 | testing-patterns.md | testing-patterns, eslint, zustand, react-router | 3 | **medium** | 2026-05-19 |
 | error-handling.md | error-handling, shutdown, abort-error | 2 | low | 2026-05-19 |
 | state-architecture.md | state-architecture, react, zustand | 2 | low | 2026-05-19 |
