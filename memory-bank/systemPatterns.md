@@ -9,6 +9,10 @@ Consumers subscribe to event streams rather than polling.
 Events: timestamp, actor, action type, card ID, before/after state.
 In-process emitter for v1; design for future message bus.
 
+## Error Handling
+
+Structured JSON with code, message, details. Extend base AppError.
+
 ## Guiding Principles
 
 | Principle                  | Description                                                                                                                                                               |
@@ -133,7 +137,7 @@ JSON response → React renders columns and cards
 ### Fire-and-Forget Activity Hooks — Non-Blocking Event Emission
 
 - **Problem**: Activity recording (DB write + in-process emit) must never delay the HTTP response to the client.
-- **Implementation**: Controllers call `activityService.recordEvent()` *after* `res.json()` via `void promise.catch(logger.error)`. No `await`; errors are logged but don't propagate to the response.
+- **Implementation**: Controllers call `activityService.recordEvent()` _after_ `res.json()` via `void promise.catch(logger.error)`. No `await`; errors are logged but don't propagate to the response.
 - **Trade-offs**: Event emission is best-effort — a DB failure will log an error but the card operation has already succeeded. This is intentional for MVP resilience.
 - **Example**: `backend/src/controllers/ColumnController.ts` (card_created), `backend/src/controllers/CardController.ts` (card_moved / card_updated)
 

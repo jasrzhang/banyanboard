@@ -1,7 +1,7 @@
 # Product Roadmap
 
 ## Summary
-- **Total Features**: 5
+- **Total Features**: 6
 - **Complete Features**: 4 (FEAT-001, FEAT-002, FEAT-003, FEAT-004)
 - **Released Versions**: 0
 - **Active Versions**: 0
@@ -35,6 +35,7 @@
 - **Status**: planning
 - **Features**:
   - FEAT-005: Realtime Activity Feed [Level 3]
+  - FEAT-006: Card Labels [Level 3]
 
 ---
 
@@ -88,6 +89,18 @@
 - **Linked Tasks**: TASK-005 (planning)
 - **Branch**: feature/FEAT-005-realtime-activity-feed
 - **Created**: 2026-05-25
+
+---
+
+### FEAT-006: Card Labels
+- **Version**: next
+- **Status**: planned
+- **Priority**: medium
+- **Complexity**: Level 3
+- **Description**: Add color-coded labels to cards with filtering support. Includes label creation and management (name + color), label badge display on card tiles, inline label assignment from the card detail modal, and label filter chips in the board header. Requires design decisions on the color picker UX, label CRUD API, card-label data model, and client-side filter integration.
+- **Linked Tasks**: TASK-006 (planning)
+- **Branch**: feature/FEAT-006-card-labels
+- **Created**: 2026-05-27
 
 ---
 

@@ -20,7 +20,8 @@
       "Bash(not exist *)",
       "PowerShell(echo $env:PROMPT)",
       "PowerShell(Get-Command *)",
-      "Bash(bash \"C:/Users/Shruiz/.claude/statusline-command.sh\")"
+      "Bash(bash \"C:/Users/Shruiz/.claude/statusline-command.sh\")",
+      "Bash(\"C:/git/banyanboard/.claude-worktrees/FEAT-005/backend/node_modules/.bin/tsc\" --noEmit --project \"C:/git/banyanboard/.claude-worktrees/FEAT-005/backend/tsconfig.json\")"
     ]
   }
 }
