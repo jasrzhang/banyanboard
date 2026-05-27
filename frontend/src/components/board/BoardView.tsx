@@ -17,9 +17,10 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useBoard } from '../../hooks/useBoard';
+import { useLabels } from '../../hooks/useLabels';
 import { useMoveCard } from '../../hooks/useMoveCard';
 import { useCreateCard } from '../../hooks/useCreateCard';
-import type { Board, Card, Label } from '../../types/domain';
+import type { Board, Card } from '../../types/domain';
 import { Column } from './Column';
 import { CardTile } from '../card/CardTile';
 import { BoardErrorPanel } from './BoardErrorPanel';
@@ -141,20 +142,7 @@ export function BoardView({ boardId }: BoardViewProps) {
     activityToggleRef.current?.focus();
   }, []);
 
-  const allLabels = useMemo<Label[]>(() => {
-    if (!board) return [];
-    const seen = new Map<string, Label>();
-    for (const col of board.columns) {
-      for (const card of col.cards) {
-        for (const label of card.labels) {
-          if (!seen.has(label.id)) {
-            seen.set(label.id, label);
-          }
-        }
-      }
-    }
-    return Array.from(seen.values());
-  }, [board]);
+  const { data: allLabels = [] } = useLabels(boardId);
 
   const hasActiveFilters =
     searchQuery.length > 0 || activeLabelIds.length > 0 || activeDateFilter !== 'none';

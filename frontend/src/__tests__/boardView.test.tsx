@@ -7,12 +7,24 @@ import type { UseQueryResult } from '@tanstack/react-query';
 
 vi.mock('../hooks/useBoard');
 vi.mock('../hooks/useBoards');
+vi.mock('../hooks/useLabels');
 
 import { useBoard } from '../hooks/useBoard';
+import { useLabels } from '../hooks/useLabels';
 import { BoardView } from '../components/board/BoardView';
 import { BoardDetailPage } from '../pages/BoardDetailPage';
 
 const mockUseBoard = vi.mocked(useBoard);
+const mockUseLabels = vi.mocked(useLabels);
+
+function makeLabelsResult(labels: Array<{ id: string; name: string; color: string }> = []) {
+  return {
+    data: labels,
+    isLoading: false,
+    isError: false,
+    error: null,
+  } as unknown as ReturnType<typeof useLabels>;
+}
 
 type UseBoardResult = ReturnType<typeof useBoard>;
 
@@ -174,6 +186,7 @@ function BoardViewWrapper({ boardId = 'board-1' }: { boardId?: string } = {}) {
 describe('BoardView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseLabels.mockReturnValue(makeLabelsResult());
   });
 
   it('renders column names and card-count badges from fixture data', () => {
@@ -285,10 +298,16 @@ describe('BoardView', () => {
   });
 });
 
+const fixtureBoardLabels = [
+  { id: 'lbl-1', name: 'bug', color: '#be123c' },
+  { id: 'lbl-2', name: 'frontend', color: '#0369a1' },
+];
+
 describe('BoardView search and filter', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseBoard.mockReturnValue(makeBoardResult({ data: fixtureBoard, isSuccess: true }));
+    mockUseLabels.mockReturnValue(makeLabelsResult(fixtureBoardLabels));
   });
 
   it('renders board name in the board header', () => {
@@ -359,11 +378,29 @@ describe('BoardView search and filter', () => {
     expect(screen.getByText('Write API docs')).toBeInTheDocument();
     expect(screen.getByText('Implement Kanban UI')).toBeInTheDocument();
   });
+
+  it('filter dropdown shows labels from the API even if not assigned to any card (AC-ENTRY-2)', () => {
+    // 'backend' label exists on the board but is not assigned to any card in fixtureBoard
+    mockUseLabels.mockReturnValue(makeLabelsResult([
+      ...fixtureBoardLabels,
+      { id: 'lbl-3', name: 'backend', color: '#6d28d9' },
+    ]));
+
+    render(<BoardViewWrapper />);
+    fireEvent.click(screen.getByRole('button', { name: /filters/i }));
+    const filterPanel = screen.getByRole('group', { name: /filter options/i });
+
+    // All three labels appear — including 'backend' which has no cards assigned
+    expect(within(filterPanel).getByRole('button', { name: /^bug$/i })).toBeInTheDocument();
+    expect(within(filterPanel).getByRole('button', { name: /^frontend$/i })).toBeInTheDocument();
+    expect(within(filterPanel).getByRole('button', { name: /^backend$/i })).toBeInTheDocument();
+  });
 });
 
 describe('BoardDetailPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseLabels.mockReturnValue(makeLabelsResult());
   });
 
   it('renders BoardView when useBoard returns data (AC-ENTRY-1: no "coming soon" text)', () => {

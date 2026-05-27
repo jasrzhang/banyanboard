@@ -339,5 +339,73 @@ describe('LabelPickerSection', () => {
         screen.getByRole('button', { name: 'Remove bug label' }),
       ).toBeInTheDocument();
     });
+
+    it('trigger button has aria-expanded="false" when panel is closed', () => {
+      renderPicker([]);
+
+      const trigger = screen.getByRole('button', { name: /add labels/i });
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('trigger button has aria-expanded="true" when panel is open', async () => {
+      const user = userEvent.setup();
+      renderPicker([]);
+
+      await user.click(screen.getByRole('button', { name: /add labels/i }));
+
+      const trigger = screen.getByRole('button', { name: /add labels|edit/i });
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('trigger button has aria-controls="label-picker-panel"', () => {
+      renderPicker([]);
+
+      const trigger = screen.getByRole('button', { name: /add labels/i });
+      expect(trigger).toHaveAttribute('aria-controls', 'label-picker-panel');
+    });
+
+    it('picker panel has id="label-picker-panel" and aria-label="Board labels" when open', async () => {
+      const user = userEvent.setup();
+      renderPicker([]);
+
+      await user.click(screen.getByRole('button', { name: /add labels/i }));
+
+      const panel = document.getElementById('label-picker-panel');
+      expect(panel).toBeInTheDocument();
+      expect(panel).toHaveAttribute('aria-label', 'Board labels');
+    });
+
+    it('label chips have aria-checked="true" for assigned and "false" for unassigned', async () => {
+      const user = userEvent.setup();
+      renderPicker([fixtureLabels[0]]); // only 'bug' assigned
+
+      await user.click(screen.getByRole('button', { name: /add labels/i }));
+
+      expect(screen.getByRole('checkbox', { name: /bug/i })).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByRole('checkbox', { name: /feature/i })).toHaveAttribute('aria-checked', 'false');
+    });
+
+    it('name input has aria-invalid="true" when validation error is shown', async () => {
+      const user = userEvent.setup();
+      renderPicker([]);
+
+      await user.click(screen.getByRole('button', { name: /add labels/i }));
+      await user.click(screen.getByRole('button', { name: /new label/i }));
+      await user.click(screen.getByRole('button', { name: /create/i }));
+
+      const nameInput = screen.getByRole('textbox', { name: /label name/i });
+      expect(nameInput).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    it('preview region has aria-live="polite"', async () => {
+      const user = userEvent.setup();
+      renderPicker([]);
+
+      await user.click(screen.getByRole('button', { name: /add labels/i }));
+      await user.click(screen.getByRole('button', { name: /new label/i }));
+
+      const liveRegion = document.querySelector('[aria-live="polite"]');
+      expect(liveRegion).toBeInTheDocument();
+    });
   });
 });
