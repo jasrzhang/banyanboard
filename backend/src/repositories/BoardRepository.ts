@@ -44,6 +44,7 @@ interface LabelItem {
   id: string;
   name: string;
   color: string;
+  icon: string | null;
 }
 
 export class BoardRepository {
@@ -92,7 +93,8 @@ export class BoardRepository {
                             SELECT json_agg(json_build_object(
                               'id',    l.id,
                               'name',  l.name,
-                              'color', l.color
+                              'color', l.color,
+                              'icon',  l.icon
                             ))
                             FROM card_labels cl
                             JOIN labels l ON l.id = cl.label_id
