@@ -103,3 +103,16 @@ Chronological record of pattern extraction and consolidation events from task re
 - Expired: 0 bullets (all learnings from 2026-05-16 to 2026-05-25, well within 90-day window)
 - Promoted: 0 files (sse.md at ec:2, below threshold of 3; architecture.md already at medium)
 - Pruned: 0 excess bullets (max file has 5 bullets, below 15-bullet limit)
+
+---
+
+## 2026-05-28 - TASK-006 Reflection
+
+### Extracted Patterns
+- **ui-patterns** → amended `agent-rules/_learned/ui-patterns.md` (evidence count: 2) — Implement ARIA attributes in the same phase as the interactive component; do not defer to a separate audit phase
+- **testing-patterns** → amended `agent-rules/_learned/testing-patterns.md` (evidence count: 4) — Popover/disclosure components require aria-expanded, aria-controls, aria-checked/aria-pressed tests at the component level
+- **architecture** → amended `agent-rules/_learned/architecture.md` (evidence count: 6) — Export new resource controller from its own route module and import in existing route module to keep service singleton single-sourced
+- **optimistic-updates** → amended `agent-rules/_learned/optimistic-updates.md` (evidence count: 2) — Replace-all mutation semantics (single snapshot/rollback/invalidate) for full-set swap surfaces
+
+### systemPatterns.md Updates
+- None (patterns are component-level coding practices, not system-level architecture patterns)
