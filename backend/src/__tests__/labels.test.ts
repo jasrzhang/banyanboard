@@ -1,6 +1,6 @@
 // Integration tests for Labels API endpoints (board-scoped CRUD).
 // Requires a running PostgreSQL instance (docker compose up -d db).
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app.js';
 import { pool } from '../config/db.js';
@@ -379,6 +379,243 @@ describe('Labels API', () => {
     it('returns 400 for invalid UUID labelId', async () => {
       const res = await request(app).delete(`/api/boards/${boardId}/labels/not-a-uuid`);
       expect(res.status).toBe(400);
+    });
+  });
+
+  // ── PUT /api/cards/:cardId/labels (card-label assignment) ───────────────────
+
+  describe('PUT /api/cards/:cardId/labels', () => {
+    let clBoardId: string;
+    let clColumnId: string;
+    let clCardId: string;
+    let clLabel1Id: string;
+    let clLabel2Id: string;
+    let clOtherBoardId: string;
+    let clOtherLabelId: string;
+
+    beforeAll(async () => {
+      // Create a board with a column, a card, and two labels
+      const bRes = await pool.query<{ id: string }>(
+        "INSERT INTO boards (name) VALUES ('CardLabel Board') RETURNING id",
+      );
+      clBoardId = bRes.rows[0]!.id;
+
+      const cRes = await pool.query<{ id: string }>(
+        "INSERT INTO columns (board_id, name, position) VALUES ($1, 'Backlog', 1) RETURNING id",
+        [clBoardId],
+      );
+      clColumnId = cRes.rows[0]!.id;
+
+      const cardRes = await pool.query<{ id: string }>(
+        "INSERT INTO cards (column_id, title, position) VALUES ($1, 'Test Card', 1000) RETURNING id",
+        [clColumnId],
+      );
+      clCardId = cardRes.rows[0]!.id;
+
+      const l1Res = await pool.query<{ id: string }>(
+        "INSERT INTO labels (board_id, name, color) VALUES ($1, 'CL-Alpha', '#be123c') RETURNING id",
+        [clBoardId],
+      );
+      clLabel1Id = l1Res.rows[0]!.id;
+
+      const l2Res = await pool.query<{ id: string }>(
+        "INSERT INTO labels (board_id, name, color) VALUES ($1, 'CL-Beta', '#047857') RETURNING id",
+        [clBoardId],
+      );
+      clLabel2Id = l2Res.rows[0]!.id;
+
+      // A label on a different board (to test cross-board protection)
+      const otherBoardRes = await pool.query<{ id: string }>(
+        "INSERT INTO boards (name) VALUES ('Other CL Board') RETURNING id",
+      );
+      clOtherBoardId = otherBoardRes.rows[0]!.id;
+
+      const otherLabelRes = await pool.query<{ id: string }>(
+        "INSERT INTO labels (board_id, name, color) VALUES ($1, 'OtherBoard-Label', '#6d28d9') RETURNING id",
+        [clOtherBoardId],
+      );
+      clOtherLabelId = otherLabelRes.rows[0]!.id;
+    });
+
+    afterAll(async () => {
+      await pool.query('DELETE FROM boards WHERE id = $1', [clBoardId]);
+      await pool.query('DELETE FROM boards WHERE id = $1', [clOtherBoardId]);
+    });
+
+    // Reset card_labels before each test so each test starts fresh
+    beforeEach(async () => {
+      await pool.query('DELETE FROM card_labels WHERE card_id = $1', [clCardId]);
+    });
+
+    it('returns 200 with labels array when assigning labels to a card (happy path)', async () => {
+      const res = await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({ labelIds: [clLabel1Id, clLabel2Id] });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('labels');
+      expect(Array.isArray(res.body.labels)).toBe(true);
+      expect(res.body.labels).toHaveLength(2);
+
+      const names = res.body.labels.map((l: { name: string }) => l.name).sort();
+      expect(names).toEqual(['CL-Alpha', 'CL-Beta'].sort());
+
+      // Each label has the expected fields
+      const label = res.body.labels.find((l: { id: string }) => l.id === clLabel1Id);
+      expect(label).toMatchObject({
+        id: clLabel1Id,
+        name: 'CL-Alpha',
+        color: '#be123c',
+      });
+    });
+
+    it('returns 200 with single label when assigning one label', async () => {
+      const res = await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({ labelIds: [clLabel1Id] });
+
+      expect(res.status).toBe(200);
+      expect(res.body.labels).toHaveLength(1);
+      expect(res.body.labels[0]).toMatchObject({ id: clLabel1Id });
+    });
+
+    it('returns 200 with empty labels array when clearing all labels', async () => {
+      // First assign a label
+      await pool.query('INSERT INTO card_labels (card_id, label_id) VALUES ($1, $2)', [
+        clCardId,
+        clLabel1Id,
+      ]);
+
+      // Then clear with empty array
+      const res = await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({ labelIds: [] });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('labels');
+      expect(res.body.labels).toHaveLength(0);
+
+      // Verify in DB
+      const check = await pool.query('SELECT label_id FROM card_labels WHERE card_id = $1', [
+        clCardId,
+      ]);
+      expect(check.rows).toHaveLength(0);
+    });
+
+    it('is idempotent: sending the same labelIds twice yields the same result', async () => {
+      const first = await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({ labelIds: [clLabel1Id] });
+
+      const second = await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({ labelIds: [clLabel1Id] });
+
+      expect(first.status).toBe(200);
+      expect(second.status).toBe(200);
+      expect(second.body.labels).toHaveLength(1);
+      expect(second.body.labels[0]!.id).toBe(clLabel1Id);
+    });
+
+    it('replaces previous labels: assigning label2 removes label1', async () => {
+      // Assign label1
+      await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({ labelIds: [clLabel1Id] });
+
+      // Replace with label2 only
+      const res = await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({ labelIds: [clLabel2Id] });
+
+      expect(res.status).toBe(200);
+      expect(res.body.labels).toHaveLength(1);
+      expect(res.body.labels[0]!.id).toBe(clLabel2Id);
+
+      // Verify label1 is no longer assigned
+      const check = await pool.query(
+        'SELECT label_id FROM card_labels WHERE card_id = $1 AND label_id = $2',
+        [clCardId, clLabel1Id],
+      );
+      expect(check.rows).toHaveLength(0);
+    });
+
+    it('returns labels ordered by name (alphabetical)', async () => {
+      const res = await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({ labelIds: [clLabel2Id, clLabel1Id] }); // intentionally out of order
+
+      expect(res.status).toBe(200);
+      const names = res.body.labels.map((l: { name: string }) => l.name);
+      expect(names).toEqual([...names].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())));
+    });
+
+    it('returns 404 when the cardId does not exist', async () => {
+      const res = await request(app)
+        .put('/api/cards/00000000-0000-0000-0000-000000000000/labels')
+        .send({ labelIds: [] });
+
+      expect(res.status).toBe(404);
+    });
+
+    it('returns 400 when a labelId does not belong to the card\'s board (cross-board protection)', async () => {
+      const res = await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({ labelIds: [clOtherLabelId] });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 for an invalid UUID in labelIds array', async () => {
+      const res = await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({ labelIds: ['not-a-uuid'] });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 for an invalid UUID cardId', async () => {
+      const res = await request(app)
+        .put('/api/cards/not-a-uuid/labels')
+        .send({ labelIds: [] });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when labelIds is missing from body', async () => {
+      const res = await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({});
+
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when labelIds exceeds max (50 entries)', async () => {
+      const fakeIds = Array.from(
+        { length: 51 },
+        (_, i) => `00000000-0000-0000-0000-${String(i).padStart(12, '0')}`,
+      );
+      const res = await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({ labelIds: fakeIds });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('returns label icon field in the response', async () => {
+      // Set an icon on label1
+      await pool.query('UPDATE labels SET icon = $1 WHERE id = $2', ['🔥', clLabel1Id]);
+
+      const res = await request(app)
+        .put(`/api/cards/${clCardId}/labels`)
+        .send({ labelIds: [clLabel1Id] });
+
+      expect(res.status).toBe(200);
+      const label = res.body.labels.find((l: { id: string }) => l.id === clLabel1Id);
+      expect(label).toHaveProperty('icon', '🔥');
+
+      // Reset icon
+      await pool.query('UPDATE labels SET icon = NULL WHERE id = $1', [clLabel1Id]);
     });
   });
 

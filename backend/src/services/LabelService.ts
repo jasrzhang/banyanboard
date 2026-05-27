@@ -1,5 +1,5 @@
 import type { LabelRepository, LabelRow } from '../repositories/LabelRepository.js';
-export { DuplicateLabelError } from '../repositories/LabelRepository.js';
+export { DuplicateLabelError, InvalidLabelAssignmentError } from '../repositories/LabelRepository.js';
 
 export class LabelService {
   constructor(private readonly repo: LabelRepository) {}
@@ -36,5 +36,29 @@ export class LabelService {
     const existing = await this.repo.findById(labelId);
     if (!existing || existing.boardId !== boardId) return false;
     return this.repo.delete(labelId);
+  }
+
+  async replaceCardLabels(
+    cardId: string,
+    labelIds: string[],
+  ): Promise<{
+    cardId: string;
+    boardId: string;
+    labels: LabelRow[];
+    added: string[];
+    removed: string[];
+  } | null> {
+    const boardId = await this.repo.getCardBoardId(cardId);
+    if (!boardId) return null;
+
+    const before = await this.repo.getAssignedLabelIds(cardId);
+    const labels = await this.repo.replaceAssignments(cardId, labelIds);
+
+    const beforeSet = new Set(before);
+    const afterSet = new Set(labelIds);
+    const added = labelIds.filter((id) => !beforeSet.has(id));
+    const removed = before.filter((id) => !afterSet.has(id));
+
+    return { cardId, boardId, labels, added, removed };
   }
 }

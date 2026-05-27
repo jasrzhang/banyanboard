@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import type { LabelService } from '../services/LabelService.js';
-import { DuplicateLabelError } from '../services/LabelService.js';
-import { CreateLabelSchema, UpdateLabelSchema } from '../schemas/labelSchemas.js';
+import { DuplicateLabelError, InvalidLabelAssignmentError } from '../services/LabelService.js';
+import { CreateLabelSchema, ReplaceCardLabelsSchema, UpdateLabelSchema } from '../schemas/labelSchemas.js';
 
 const uuidParam = z.string().uuid();
 
@@ -152,6 +152,67 @@ export class LabelController {
 
       res.status(204).send();
     } catch (err) {
+      next(err);
+    }
+  };
+}
+
+export class CardLabelController {
+  constructor(private readonly service: LabelService) {}
+
+  replace = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const parsedCardId = uuidParam.safeParse(req.params['cardId']);
+      if (!parsedCardId.success) {
+        res
+          .status(400)
+          .json({ error: { message: 'Invalid card ID', traceId: req.traceContext.traceId } });
+        return;
+      }
+
+      const parsedBody = ReplaceCardLabelsSchema.safeParse(req.body);
+      if (!parsedBody.success) {
+        res.status(400).json({
+          error: {
+            message: 'Invalid request',
+            issues: parsedBody.error.issues,
+            traceId: req.traceContext.traceId,
+          },
+        });
+        return;
+      }
+
+      const result = await this.service.replaceCardLabels(
+        parsedCardId.data,
+        parsedBody.data.labelIds,
+      );
+
+      if (!result) {
+        res
+          .status(404)
+          .json({ error: { message: 'Card not found', traceId: req.traceContext.traceId } });
+        return;
+      }
+
+      req.logger.info('card_labels_updated', {
+        cardId: result.cardId,
+        boardId: result.boardId,
+        addedCount: result.added.length,
+        removedCount: result.removed.length,
+        traceId: req.traceContext.traceId,
+      });
+
+      res.status(200).json({ labels: result.labels });
+    } catch (err) {
+      if (err instanceof InvalidLabelAssignmentError) {
+        res.status(400).json({
+          error: {
+            message: 'One or more labels do not belong to this board',
+            traceId: req.traceContext.traceId,
+          },
+        });
+        return;
+      }
       next(err);
     }
   };
