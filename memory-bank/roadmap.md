@@ -2,7 +2,7 @@
 
 ## Summary
 - **Total Features**: 6
-- **Complete Features**: 4 (FEAT-001, FEAT-002, FEAT-003, FEAT-004)
+- **Complete Features**: 6 (FEAT-001, FEAT-002, FEAT-003, FEAT-004, FEAT-005, FEAT-006)
 - **Released Versions**: 0
 - **Active Versions**: 0
 - **Planning Versions**: 2
@@ -82,25 +82,27 @@
 
 ### FEAT-005: Realtime Activity Feed
 - **Version**: next
-- **Status**: planned
+- **Status**: complete
 - **Priority**: medium
 - **Complexity**: Level 3
 - **Description**: Track and display a realtime activity feed — capture board events (card created, moved, updated, deleted) and surface them in a live-updating feed panel. Requires decisions on realtime transport (WebSocket vs SSE vs polling), activity event schema, and feed UI/UX.
-- **Linked Tasks**: TASK-005 (planning)
-- **Branch**: feature/FEAT-005-realtime-activity-feed
+- **Linked Tasks**: TASK-005 (complete)
+- **Branch**: feature/FEAT-005-realtime-activity-feed (merged 2026-05-25)
 - **Created**: 2026-05-25
+- **Completed**: 2026-05-25
 
 ---
 
 ### FEAT-006: Card Labels
 - **Version**: next
-- **Status**: planned
+- **Status**: complete
 - **Priority**: medium
 - **Complexity**: Level 3
 - **Description**: Add color-coded labels to cards with filtering support. Includes label creation and management (name + color), label badge display on card tiles, inline label assignment from the card detail modal, and label filter chips in the board header. Requires design decisions on the color picker UX, label CRUD API, card-label data model, and client-side filter integration.
-- **Linked Tasks**: TASK-006 (planning)
-- **Branch**: feature/FEAT-006-card-labels
+- **Linked Tasks**: TASK-006 (complete)
+- **Branch**: feature/FEAT-006-card-labels (merged 2026-05-28)
 - **Created**: 2026-05-27
+- **Completed**: 2026-05-28
 
 ---
 

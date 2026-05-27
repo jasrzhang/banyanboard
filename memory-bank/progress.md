@@ -47,6 +47,17 @@ See task archives below for completed tasks.
 
 ---
 
+## Task Archive: TASK-006
+
+**Task**: Card Labels
+**Status**: ✅ ARCHIVED
+**Date**: 2026-05-28
+**Archive**: `memory-bank/archive/archive-TASK-006.md`
+
+---
+
+---
+
 ## Task Archive: TASK-002
 
 **Task**: Frontend Foundation
