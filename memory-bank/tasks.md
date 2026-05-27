@@ -7,4 +7,4 @@
 | TASK-003 | Kanban Board UI | ARCHIVE | COMPLETE | FEAT-003 |
 | TASK-004 | Card Detail Modal + Search/Filter | ARCHIVE | COMPLETE | FEAT-004 |
 | TASK-005 | Realtime Activity Feed | ARCHIVE | COMPLETE | FEAT-005 |
-| TASK-006 | Card Labels | BUILD | Phase 2/4 | FEAT-006 |
+| TASK-006 | Card Labels | BUILD | Phase 3/4 | FEAT-006 |

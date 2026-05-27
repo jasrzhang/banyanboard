@@ -222,7 +222,7 @@ This is a Level 3 feature. The following design questions require creative explo
 
 - [x] Phase 1: Backend — Label CRUD API (`LabelRepository`, `LabelService`, `LabelController`, routes: `GET/POST/PATCH/DELETE /api/boards/:boardId/labels`, migration for `icon` column)
 - [x] Phase 2: Backend — Card-label assignment API (`PUT /api/cards/:cardId/labels` replace-all endpoint; `CardLabelController`, `replaceAssignments` transactional repo method, `InvalidLabelAssignmentError`)
-- [ ] Phase 3: Frontend — Label management UI + card modal label picker (entry point and interaction pattern TBD by Creative Q1/Q2; color/emoji picker TBD by Creative Q3)
+- [x] Phase 3: Frontend — Label management UI + card modal label picker (entry point and interaction pattern TBD by Creative Q1/Q2; color/emoji picker TBD by Creative Q3)
 - [ ] Phase 4: Frontend — Filter source fix (`BoardView` fetches `allLabels` from label API instead of card data), accessibility pass, E2E tests
 
 ## Creative Phases
@@ -235,52 +235,23 @@ This is a Level 3 feature. The following design questions require creative explo
 
 ## Execution State
 
-**Build Status**: RUNNING
-**Current Build**: Phase 2: Backend Card-Label Assignment API (TASK-006)
-**Build Started**: 2026-05-27
-**Phase Number**: 2 of 4
+**Build Status**: IDLE
+**Current Build**: Phase 3 COMPLETE — ready for Phase 4
+**Phase Number**: 3 of 4 COMPLETE
 **Is Multi-Phase**: YES
 
-### Current Build Step
-**Step**: Step 11 - Git Completion (Phase 2)
-**Status**: COMPLETE
-**Started**: 2026-05-27
-**Completed**: 2026-05-27
-**Output**: Phase 2 committed to feature/FEAT-006-card-labels; 94/94 tests pass, build PASS, lint 0 errors
+### Completed Phases
+- Phase 1: Backend Label CRUD API — COMPLETE (2026-05-27) - commit 561d432
+- Phase 2: Backend Card-Label Assignment API — COMPLETE (2026-05-27) - commit bdd28ca
+- Phase 3: Frontend Label Management UI + Card Modal Label Picker — COMPLETE (2026-05-28) - commit cf34d5f
 
-### Completed Steps
-- Step 7 Integration Verification: COMPLETE - Tests 81/81, Build PASS, Typecheck PASS, Lint 0 errors
-- Step 8 Code Review: COMPLETE - APPROVED (0 blocking issues; 1 RECOMMENDED applied: ReplaceCardLabelsSchema min(0); 1 layering fix applied: DuplicateLabelError re-export via service)
-- Step 9 Documentation: COMPLETE - techContext.md updated (schema tables, new endpoints, recent changes); systemPatterns.md updated (typed error re-export pattern)
-- Step 10 Memory Bank: COMPLETE - tasks.md registry updated (BUILD Phase 1/4); TASK-006.md Phase 1 marked complete
-
-### Sub-Agent: Coding Agent
-**Agent Type**: Coding Agent
-**Status**: COMPLETE
-**Completed**: 2026-05-27
-**Output**: 8 files created/modified; migration applied; 31/31 label tests pass; 81/81 total tests pass
-
-### Completed Steps
-- Step 0.5 Git Setup: COMPLETE (2026-05-27) - Branch feature/FEAT-006-card-labels created, worktree at .claude-worktrees/FEAT-006
-- Step 3 Test Writer: COMPLETE (2026-05-27) - 29 tests in labels.test.ts (5 describe blocks covering GET/POST/PATCH/DELETE + icon integration)
-
-### Sub-Agent: Test Writer Agent
-**Agent Type**: Test Writer
-**Status**: COMPLETE
-**Completed**: 2026-05-27
-**Output**: 29 tests in backend/src/__tests__/labels.test.ts
-
-### Completed Steps
-- Step 0.1: TASK-006 auto-provisioned for FEAT-006
-- Step 3: Spec Writer Agent - COMPLETE (spec approved by human; creative flagged)
-- Creative: User Journey Design - COMPLETE → memory-bank/creative/TASK-006-card-labels-user-journey.md
-- Creative: UI/UX Design - COMPLETE → memory-bank/creative/TASK-006-card-labels-uiux.md
-- Creative: Architecture Design - COMPLETE → memory-bank/creative/TASK-006-card-labels-architecture.md
-
-### Sub-Agents
-(none yet)
+### Phase 3 Summary
+- 55 new tests (121 total): labelsApi.test.ts ×8, labelHooks.test.tsx ×11, colorSwatchGrid.test.tsx ×7, labelPickerSection.test.tsx ×18, cardDetail.test.tsx ×11
+- New files: labelsApi.ts, useLabels/useCreateLabel/useDeleteLabel/useReplaceCardLabels hooks, LabelPickerSection.tsx, ColorSwatchGrid.tsx
+- Modified: CardDetailModal.tsx (interactive label picker), types/api.ts and domain.ts (new DTOs + icon field)
+- Tests: 121/121 PASS | Build: PASS | Lint: 0 errors
 
 ### Resumption Notes
 **Can Resume**: YES
-**Resume From**: Step 0.5 Git Setup (create worktree)
-**Notes**: First build for TASK-006. Committing creative phase files to master, then creating feature/FEAT-006-card-labels worktree.
+**Resume From**: Phase 4 (Filter source fix, accessibility, E2E tests)
+**Notes**: Run /banyan-build TASK-006 to start Phase 4.
