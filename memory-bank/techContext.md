@@ -160,8 +160,11 @@ npm run format --prefix frontend
 | `columns` | uuid | board_id (FK), name, position |
 | `cards` | uuid | column_id (FK), title, position, description |
 | `activity_events` | uuid | board_id (FK CASCADE), card_id (FK SET NULL), event_type text, payload jsonb, created_at timestamptz |
+| `labels` | uuid | board_id (FK CASCADE), name text, color text, icon varchar(10) nullable; UNIQUE(board_id, name) |
+| `card_labels` | — | card_id (FK CASCADE), label_id (FK CASCADE); composite PK |
 
 `activity_events` has a composite index on `(board_id, created_at DESC)` for efficient feed queries. Migration: `1747600005000_create-activity-events.js`.
+`labels` and `card_labels` migrations: `1747600003000_create-labels.js`, `1747600004000_create-card-labels.js`. `icon` column added by `1747600006000_add-icon-to-labels.js` (TASK-006 Phase 1).
 
 ### API & Communication
 
@@ -178,8 +181,24 @@ npm run format --prefix frontend
 | `ActivityController` | `src/controllers/ActivityController.ts` | `GET /api/boards/:boardId/activity` — Zod UUID validation; returns 200 array or 400 |
 | `activityRouter` | `src/routes/activity.ts` | Mounts controller; also exports `activityService` singleton for cross-route import |
 
-**REST endpoints added:**
+**REST endpoints added (TASK-005):**
 - `GET /api/boards/:boardId/activity` — returns last 50 activity events for a board (newest first)
+
+**Backend API modules (TASK-006 Phase 1 — Label CRUD):**
+
+| Module | Path | Purpose |
+|---|---|---|
+| `LabelRepository` | `src/repositories/LabelRepository.ts` | CRUD for `labels` table; `findByBoardId`, `findById`, `create`, `update`, `delete`; throws `DuplicateLabelError` on (board_id, name) UNIQUE violation |
+| `LabelService` | `src/services/LabelService.ts` | Board-scoped label CRUD; verifies ownership before update/delete; re-exports `DuplicateLabelError` for controller consumption |
+| `LabelController` | `src/controllers/LabelController.ts` | HTTP layer for label CRUD; maps `DuplicateLabelError` → 409; null service result → 404 |
+| `labelsRouter` | `src/routes/labels.ts` | Mounted at `app.use('/api/boards', labelsRouter)` with `mergeParams: true` |
+| `labelSchemas` | `src/schemas/labelSchemas.ts` | Zod schemas: `CreateLabelSchema`, `UpdateLabelSchema`, `ReplaceCardLabelsSchema` (Phase 2) |
+
+**REST endpoints added (TASK-006 Phase 1):**
+- `GET    /api/boards/:boardId/labels` — list all labels for a board (ordered by name)
+- `POST   /api/boards/:boardId/labels` — create a new board label; 409 on duplicate name
+- `PATCH  /api/boards/:boardId/labels/:labelId` — update label name/color/icon; 404 on wrong-board
+- `DELETE /api/boards/:boardId/labels/:labelId` — delete label (CASCADE removes card_labels); 404 on wrong-board
 
 ### Infrastructure & Deployment
 
@@ -254,6 +273,13 @@ Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. F
 - **12-Factor config** — all environment-specific values via environment variables
 
 ## Recent Technology Changes
+
+### 2026-05-27 — TASK-006 Phase 1: Label CRUD API backend
+
+- **What Changed**: Added board-scoped label CRUD API (`GET/POST/PATCH/DELETE /api/boards/:boardId/labels`), `LabelRepository`, `LabelService`, `LabelController`, `labelsRouter`, `labelSchemas.ts`. Applied migration `1747600006000_add-icon-to-labels.js` to add nullable `icon VARCHAR(10)` column. Updated `BoardRepository.findByIdWithColumnsAndCards` to include `icon` in nested label json.
+- **Reason**: FEAT-006 Card Labels Phase 1 — provides the label management backend required by the frontend label picker and filter chips.
+- **Impact**: `GET /api/boards/:id` now returns `icon` field in each nested card label. New label CRUD endpoints live. `DuplicateLabelError` is re-exported from `LabelService` for controller use (controller→service import allowed by ESLint layering rule).
+- **Migration Notes**: Run `npm run migrate --prefix backend` to apply `1747600006000_add-icon-to-labels.js` if not yet applied.
 
 ### 2026-05-16 — Phase 1: TypeScript backend scaffolding + ESLint
 

@@ -13,6 +13,21 @@ In-process emitter for v1; design for future message bus.
 
 Structured JSON with code, message, details. Extend base AppError.
 
+### Typed Domain Error Re-export Pattern (TASK-006)
+
+Typed domain errors (e.g., `DuplicateLabelError`) are defined in the **repository** layer (where the DB constraint fires) but **re-exported from the service** layer so controllers can import them without violating the controller→service layering rule. The ESLint `no-restricted-imports` rule blocks direct controller→repository imports.
+
+```typescript
+// repositories/LabelRepository.ts — defines the error
+export class DuplicateLabelError extends Error { ... }
+
+// services/LabelService.ts — re-exports for controller use
+export { DuplicateLabelError } from '../repositories/LabelRepository.js';
+
+// controllers/LabelController.ts — imports from service (allowed)
+import { DuplicateLabelError } from '../services/LabelService.js';
+```
+
 ## Guiding Principles
 
 | Principle                  | Description                                                                                                                                                               |
