@@ -221,7 +221,7 @@ This is a Level 3 feature. The following design questions require creative explo
 ## Implementation Roadmap
 
 - [x] Phase 1: Backend — Label CRUD API (`LabelRepository`, `LabelService`, `LabelController`, routes: `GET/POST/PATCH/DELETE /api/boards/:boardId/labels`, migration for `icon` column)
-- [ ] Phase 2: Backend — Card-label assignment API (API shape TBD by Creative Q4; `PUT /api/cards/:cardId/labels` or individual toggle endpoints)
+- [x] Phase 2: Backend — Card-label assignment API (`PUT /api/cards/:cardId/labels` replace-all endpoint; `CardLabelController`, `replaceAssignments` transactional repo method, `InvalidLabelAssignmentError`)
 - [ ] Phase 3: Frontend — Label management UI + card modal label picker (entry point and interaction pattern TBD by Creative Q1/Q2; color/emoji picker TBD by Creative Q3)
 - [ ] Phase 4: Frontend — Filter source fix (`BoardView` fetches `allLabels` from label API instead of card data), accessibility pass, E2E tests
 
@@ -236,15 +236,17 @@ This is a Level 3 feature. The following design questions require creative explo
 ## Execution State
 
 **Build Status**: RUNNING
-**Current Build**: Phase 1: Backend Label CRUD API (TASK-006)
+**Current Build**: Phase 2: Backend Card-Label Assignment API (TASK-006)
 **Build Started**: 2026-05-27
-**Phase Number**: 1 of 4
+**Phase Number**: 2 of 4
 **Is Multi-Phase**: YES
 
 ### Current Build Step
-**Step**: Step 11 - Git Completion
-**Status**: RUNNING
+**Step**: Step 11 - Git Completion (Phase 2)
+**Status**: COMPLETE
 **Started**: 2026-05-27
+**Completed**: 2026-05-27
+**Output**: Phase 2 committed to feature/FEAT-006-card-labels; 94/94 tests pass, build PASS, lint 0 errors
 
 ### Completed Steps
 - Step 7 Integration Verification: COMPLETE - Tests 81/81, Build PASS, Typecheck PASS, Lint 0 errors
