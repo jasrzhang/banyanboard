@@ -6,12 +6,23 @@ import type { Board } from '../types/domain';
 import type { UseQueryResult } from '@tanstack/react-query';
 
 vi.mock('../hooks/useBoard');
+vi.mock('../hooks/useLabels');
+vi.mock('../hooks/useCreateLabel');
+vi.mock('../hooks/useDeleteLabel');
+vi.mock('../hooks/useReplaceCardLabels');
 vi.mock('../api/boardsApi', () => ({
   fetchBoard: vi.fn(),
   fetchBoards: vi.fn(),
   createCard: vi.fn(),
   moveCard: vi.fn(),
   updateCard: vi.fn(),
+}));
+vi.mock('../api/labelsApi', () => ({
+  fetchLabels: vi.fn(),
+  createLabel: vi.fn(),
+  updateLabel: vi.fn(),
+  deleteLabel: vi.fn(),
+  replaceCardLabels: vi.fn(),
 }));
 vi.mock('sonner', () => ({
   toast: Object.assign(vi.fn(), {
@@ -23,6 +34,10 @@ vi.mock('sonner', () => ({
 }));
 
 import { useBoard } from '../hooks/useBoard';
+import { useLabels } from '../hooks/useLabels';
+import { useCreateLabel } from '../hooks/useCreateLabel';
+import { useDeleteLabel } from '../hooks/useDeleteLabel';
+import { useReplaceCardLabels } from '../hooks/useReplaceCardLabels';
 import { updateCard } from '../api/boardsApi';
 import { CardDetailModal } from '../components/card/CardDetailModal';
 import { toast } from 'sonner';
@@ -30,6 +45,10 @@ import { toast } from 'sonner';
 const mockUseBoard = vi.mocked(useBoard);
 const mockUpdateCard = vi.mocked(updateCard);
 const mockToastSuccess = (toast as unknown as { success: ReturnType<typeof vi.fn> }).success;
+const mockUseLabels = vi.mocked(useLabels);
+const mockUseCreateLabel = vi.mocked(useCreateLabel);
+const mockUseDeleteLabel = vi.mocked(useDeleteLabel);
+const mockUseReplaceCardLabels = vi.mocked(useReplaceCardLabels);
 
 type UseBoardResult = ReturnType<typeof useBoard>;
 
@@ -130,10 +149,40 @@ function renderModalAtRoute(cardId = 'card-1') {
   );
 }
 
+function setupLabelHookMocks() {
+  mockUseLabels.mockReturnValue({
+    data: [
+      { id: 'lbl-1', name: 'bug', color: '#be123c', icon: null },
+      { id: 'lbl-2', name: 'frontend', color: '#0369a1', icon: null },
+    ],
+    isLoading: false,
+    isError: false,
+    error: null,
+  } as unknown as ReturnType<typeof useLabels>);
+
+  mockUseReplaceCardLabels.mockReturnValue({
+    mutate: vi.fn(),
+    isPending: false,
+  } as unknown as ReturnType<typeof useReplaceCardLabels>);
+
+  mockUseCreateLabel.mockReturnValue({
+    mutate: vi.fn(),
+    isPending: false,
+    isError: false,
+    error: null,
+  } as unknown as ReturnType<typeof useCreateLabel>);
+
+  mockUseDeleteLabel.mockReturnValue({
+    mutate: vi.fn(),
+    isPending: false,
+  } as unknown as ReturnType<typeof useDeleteLabel>);
+}
+
 describe('CardDetailModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseBoard.mockReturnValue(makeBoardResult({ data: fixtureBoard, isSuccess: true }));
+    setupLabelHookMocks();
   });
 
   it('renders title, description, due date, and label chips from card data', () => {
@@ -248,5 +297,12 @@ describe('CardDetailModal', () => {
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveAttribute('aria-modal', 'true');
+  });
+
+  it('Labels section is always visible (even with no labels on card)', () => {
+    renderModalAtRoute('card-2');
+
+    // The trigger button should always render regardless of card.labels length
+    expect(screen.getByRole('button', { name: /add labels/i })).toBeInTheDocument();
   });
 });

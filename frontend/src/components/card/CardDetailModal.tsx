@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useBoard } from '../../hooks/useBoard';
 import { useUpdateCard } from '../../hooks/useUpdateCard';
 import type { Card } from '../../types/domain';
+import { LabelPickerSection } from './LabelPickerSection';
 
 type RouteParams = { boardId: string; cardId: string };
 
@@ -195,23 +196,8 @@ function CardModalContent({ card, boardId }: { card: Card; boardId: string }) {
             />
           </div>
 
-          {/* Labels (display only) */}
-          {card.labels.length > 0 && (
-            <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium text-text-secondary">Labels</span>
-              <div className="flex flex-wrap gap-1.5">
-                {card.labels.map((label) => (
-                  <span
-                    key={label.id}
-                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                    style={{ backgroundColor: label.color + '33', color: label.color }}
-                  >
-                    {label.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Labels (interactive picker) */}
+          <LabelPickerSection cardId={card.id} boardId={boardId} cardLabels={card.labels} />
 
           {/* Inline error */}
           {errorMessage && (

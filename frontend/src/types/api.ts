@@ -33,3 +33,27 @@ export interface ApiError {
     issues?: Array<{ message: string; path: Array<string | number> }>;
   };
 }
+
+/** POST /api/boards/:boardId/labels — request body */
+export interface CreateLabelRequest {
+  name: string;
+  color: string;
+  icon?: string | null;
+}
+
+/** PATCH /api/boards/:boardId/labels/:labelId — request body */
+export interface UpdateLabelRequest {
+  name?: string;
+  color?: string;
+  icon?: string | null;
+}
+
+/** PUT /api/cards/:cardId/labels — request body */
+export interface ReplaceCardLabelsRequest {
+  labelIds: string[];
+}
+
+/** PUT /api/cards/:cardId/labels — response body */
+export interface ReplaceCardLabelsResponse {
+  labels: import('./domain').Label[];
+}

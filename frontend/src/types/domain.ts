@@ -2,6 +2,7 @@ export interface Label {
   id: string;
   name: string;
   color: string;
+  icon?: string | null;
 }
 
 export interface Card {
