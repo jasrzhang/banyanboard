@@ -1,7 +1,7 @@
 # Product Roadmap
 
 ## Summary
-- **Total Features**: 6
+- **Total Features**: 7
 - **Complete Features**: 6 (FEAT-001, FEAT-002, FEAT-003, FEAT-004, FEAT-005, FEAT-006)
 - **Released Versions**: 0
 - **Active Versions**: 0
@@ -36,6 +36,7 @@
 - **Features**:
   - FEAT-005: Realtime Activity Feed [Level 3]
   - FEAT-006: Card Labels [Level 3]
+  - FEAT-007: Card Workflow Automation [Level 3]
 
 ---
 
@@ -103,6 +104,18 @@
 - **Branch**: feature/FEAT-006-card-labels (merged 2026-05-28)
 - **Created**: 2026-05-27
 - **Completed**: 2026-05-28
+
+---
+
+### FEAT-007: Card Workflow Automation
+- **Version**: next
+- **Status**: planned
+- **Priority**: medium
+- **Complexity**: Level 3
+- **Description**: Simple trigger/action rules on cards: when a card moves to a column or gets a label/due date, automatically fire a configurable action (assign a label, move to another column, send a notification). Rules defined inline per-board with no separate automation page.
+- **Linked Tasks**: None
+- **Branch**: feature/FEAT-007-card-workflow-automation
+- **Created**: 2026-05-28
 
 ---
 
