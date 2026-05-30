@@ -7,6 +7,7 @@ See task archives below for completed tasks.
 ## Planning Log
 
 | Date | Task | Phase | Note |
+| 2026-05-30 | TASK-007 Card Workflow Automation | ARCHIVE | Task archived. 150/150 tests, 0 blocking review findings, all 13 ACs met. Archive: memory-bank/archive/archive-TASK-007.md. ui-patterns.md promoted to medium priority (evidence_count reached 3). |
 | 2026-05-30 | TASK-007 Card Workflow Automation | REFLECTION_COMPLETE | Reflection created. Task Quality: Good (all 13 ACs met, 150 tests). Ecosystem Effectiveness: Highly Effective. 4 learnings extracted — testing-patterns.md (×2), architecture.md, ui-patterns.md. |
 | 2026-05-30 | TASK-007 Card Workflow Automation | BUILD Phase 3/3 COMPLETE | Rule Creation Form: AutomationRuleForm.tsx (full-panel takeover, 4 conditional selects, client-side validation with all 6 exact error messages per spec, 422→inline circular-loop error, 5xx→toast.error, success→toast.success+form-close). AutomationsPanel.tsx: showForm local state (no external onAddRule); header switches between "Automations" and "← New rule [×]". BoardView.tsx: removed onAddRule placeholder prop. 10 new tests + 140 existing = 150 total. Build+Lint PASS. Code Review: APPROVED (0 blocking; aria-busy coercion fix; truncate removed from rule summary). |
 | 2026-05-30 | TASK-007 Card Workflow Automation | BUILD Phase 2/3 COMPLETE | Frontend Panel: AutomationsPanel (<aside aria-label="Automations">, loading/empty/rule-list states, ruleToString() summaries, delete × with spinner, toast.error on failure, Escape-to-close). BoardHeader: Automations toggle button (Zap SVG, aria-pressed, active/inactive CSS). BoardView: automationsOpen state + mutual exclusion with Activity panel. ActivityEntry: automation_triggered event type + AutomationIcon (amber lightning bolt). apiClient: deleteEmpty() for 204 No Content. Types: AutomationRule, automation_triggered ActivityEventType. 11 new tests + 129 existing = 140 total. Build+Lint PASS. Code Review: APPROVED (0 blocking). |
@@ -48,6 +49,15 @@ See task archives below for completed tasks.
 ---
 
 *Updated by `/banyan-archive` after each task completion.*
+
+---
+
+## Task Archive: TASK-007
+
+**Task**: Card Workflow Automation
+**Status**: ✅ ARCHIVED
+**Date**: 2026-05-30
+**Archive**: `memory-bank/archive/archive-TASK-007.md`
 
 ---
 

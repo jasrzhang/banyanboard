@@ -2,7 +2,7 @@
 
 ## Summary
 - **Total Features**: 7
-- **Complete Features**: 6 (FEAT-001, FEAT-002, FEAT-003, FEAT-004, FEAT-005, FEAT-006)
+- **Complete Features**: 7 (FEAT-001, FEAT-002, FEAT-003, FEAT-004, FEAT-005, FEAT-006, FEAT-007)
 - **Released Versions**: 0
 - **Active Versions**: 0
 - **Planning Versions**: 2
@@ -109,13 +109,14 @@
 
 ### FEAT-007: Card Workflow Automation
 - **Version**: next
-- **Status**: planned
+- **Status**: complete
 - **Priority**: medium
 - **Complexity**: Level 3
 - **Description**: Simple trigger/action rules on cards: when a card moves to a column or gets a label/due date, automatically fire a configurable action (assign a label, move to another column, send a notification). Rules defined inline per-board with no separate automation page.
-- **Linked Tasks**: None
-- **Branch**: feature/FEAT-007-card-workflow-automation
+- **Linked Tasks**: TASK-007 (complete)
+- **Branch**: feature/FEAT-007-card-workflow-automation (merged 2026-05-30)
 - **Created**: 2026-05-28
+- **Completed**: 2026-05-30
 
 ---
 

@@ -2,7 +2,7 @@
 name: "Learned: UI Patterns — ARIA Groups + Test Isolation + API Client"
 globs: ["src/components/**/*.tsx", "frontend/src/components/**/*.tsx", "*.test.tsx", "frontend/src/api/*.ts"]
 topics: ["ui-patterns", "accessibility", "testing-patterns", "aria", "react", "api-client"]
-priority: low
+priority: medium
 evidence_count: 3
 last_updated: 2026-05-30
 auto_generated: true

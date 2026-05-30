@@ -31,7 +31,7 @@
 | error-handling.md | error-handling, shutdown, abort-error | 2 | low | 2026-05-19 |
 | state-architecture.md | state-architecture, react, zustand | 2 | low | 2026-05-19 |
 | optimistic-updates.md | optimistic-updates, tanstack-query, frontend | 2 | low | 2026-05-28 |
-| ui-patterns.md | ui-patterns, accessibility, aria, react, api-client | 3 | low | 2026-05-30 |
+| ui-patterns.md | ui-patterns, accessibility, aria, react, api-client | 3 | **medium** | 2026-05-30 |
 | observability.md | observability, logging | 1 | low | 2026-05-16 |
 | toolchain-setup.md | toolchain-setup, vitest, npm, frontend | 1 | low | 2026-05-18 |
 | data-access.md | data-access, postgresql, repositories | 1 | low | 2026-05-19 |
@@ -46,3 +46,4 @@
 | 2026-05-25 | 10 | 10 | 0 | 0 | 0 |
 | 2026-05-28 | 10 | 10 | 0 | 0 | 0 |
 | 2026-05-30 | 10 | 10 | 0 | 0 | 0 |
+| 2026-05-30 | 10 | 10 | 0 | 0 | 1 |

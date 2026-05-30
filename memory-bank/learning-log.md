@@ -129,6 +129,16 @@ Chronological record of pattern extraction and consolidation events from task re
 
 ---
 
+## 2026-05-30 - Consolidation (during TASK-007 archive)
+
+- Files before: 10, Files after: 10
+- Merged: 0 files (no >50% topic overlap found)
+- Expired: 0 bullets (all learnings 2026-05-16 to 2026-05-30, well within 90-day window)
+- Promoted: 1 file to medium priority (ui-patterns.md — reached evidence_count 3)
+- Pruned: 0 excess bullets (max file has 6 bullets, below 15-bullet limit)
+
+---
+
 ## 2026-05-30 - TASK-007 Reflection
 
 ### Extracted Patterns
