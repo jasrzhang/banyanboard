@@ -20,7 +20,7 @@ export function ActivityFeedPanel({ boardId, onClose }: ActivityFeedPanelProps) 
 
   return (
     <aside
-      aria-label="Activity feed"
+      aria-label="Activity"
       className="flex-shrink-0 w-80 border-l border-border bg-surface-card flex flex-col h-full overflow-hidden"
     >
       {/* Panel header */}

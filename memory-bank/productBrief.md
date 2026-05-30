@@ -20,7 +20,7 @@
 - Search cards by title; filter by label or due date
 - Card detail modal for full task inspection and editing
 - Horizontally scrollable board layout with sidebar navigation
-- **Automation rules** — board-level if/then rules that fire automatically when a card is moved to a column or a label is assigned; supported actions: assign a label, move the card to another column, or notify (activity feed entry)
+- Card workflow automation rules: view and manage per-board trigger/action rules via the Automations panel in the board header (Phase 2 complete: panel renders, rules display, delete works)
 
 ## Markets Serviced
 
@@ -283,8 +283,6 @@ src/
 - Card comments and file attachments
 - Mobile drag-and-drop (touch events)
 - JSON board export / import
-- Automation rule UI (frontend): create, view, and delete rules from the board settings panel
-- Multi-hop cycle detection for automation rules (currently detects 2-hop loops only)
 
 ## Open Questions
 
@@ -301,7 +299,8 @@ src/
 | 2026-05-16 | /banyan-init | Initial creation |
 | 2026-05-16 | User | Populated with BanyanBoard context — Kanban board for small teams |
 | 2026-05-16 | User | Frontend supplement: design language, layout, component architecture, tech stack |
+| 2026-05-30 | Documentation Agent | TASK-007 Phase 2: added Card Workflow Automation panel to Key Functionality |
 
 ## Last Refreshed
 
-2026-05-30 (TASK-007 Phase 1: Automation Rules backend added to Key Functionality)
+2026-05-30 (TASK-007 Phase 2: automation panel capability noted)

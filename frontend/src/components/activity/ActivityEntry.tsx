@@ -31,12 +31,19 @@ const DeletedIcon = () => (
   </svg>
 );
 
+const AutomationIcon = () => (
+  <svg className="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+  </svg>
+);
+
 function EventIcon({ eventType }: { eventType: ActivityEvent['eventType'] }) {
   switch (eventType) {
     case 'card_created': return <CreatedIcon />;
     case 'card_moved': return <MovedIcon />;
     case 'card_updated': return <UpdatedIcon />;
     case 'card_deleted': return <DeletedIcon />;
+    case 'automation_triggered': return <AutomationIcon />;
   }
 }
 
@@ -53,6 +60,16 @@ function buildDetail(event: ActivityEvent): string {
       return 'updated';
     case 'card_deleted':
       return 'deleted';
+    case 'automation_triggered': {
+      const { actionType, appliedLabelName, targetColumnName } = payload;
+      if (actionType === 'assign_label' && appliedLabelName) {
+        return `— label ${appliedLabelName} applied (automated)`;
+      }
+      if (actionType === 'move_to_column' && targetColumnName) {
+        return `— moved to ${targetColumnName} (automated)`;
+      }
+      return '— automation triggered';
+    }
   }
 }
 
