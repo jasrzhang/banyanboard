@@ -263,7 +263,6 @@ export function BoardView({ boardId }: BoardViewProps) {
           <AutomationsPanel
             boardId={boardId}
             onClose={closeAutomationsPanel}
-            onAddRule={() => { /* Phase 3 will wire this */ }}
             columns={board.columns.map((c) => ({ id: c.id, name: c.name }))}
             labels={allLabels}
           />

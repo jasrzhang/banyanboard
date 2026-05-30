@@ -6,6 +6,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 // Mocks must be declared before importing the modules they replace
 vi.mock('../hooks/useAutomationRules');
 vi.mock('../hooks/useDeleteAutomationRule');
+vi.mock('../hooks/useCreateAutomationRule');
 vi.mock('../hooks/useBoard');
 vi.mock('../hooks/useLabels');
 vi.mock('../hooks/useActivityFeed');
@@ -22,6 +23,7 @@ vi.mock('sonner', () => ({
 
 import { useAutomationRules } from '../hooks/useAutomationRules';
 import { useDeleteAutomationRule } from '../hooks/useDeleteAutomationRule';
+import { useCreateAutomationRule } from '../hooks/useCreateAutomationRule';
 import { useBoard } from '../hooks/useBoard';
 import { useLabels } from '../hooks/useLabels';
 import { useActivityFeed } from '../hooks/useActivityFeed';
@@ -34,6 +36,7 @@ import { toast } from 'sonner';
 
 const mockUseAutomationRules = vi.mocked(useAutomationRules);
 const mockUseDeleteAutomationRule = vi.mocked(useDeleteAutomationRule);
+const mockUseCreateAutomationRule = vi.mocked(useCreateAutomationRule);
 const mockUseBoard = vi.mocked(useBoard);
 const mockUseLabels = vi.mocked(useLabels);
 const mockUseActivityFeed = vi.mocked(useActivityFeed);
@@ -132,6 +135,13 @@ function makeDefaultDeleteMock() {
   } as unknown as ReturnType<typeof useDeleteAutomationRule>;
 }
 
+function makeDefaultCreateMock(overrides: Partial<{ mutate: ReturnType<typeof vi.fn>; isPending: boolean }> = {}) {
+  return {
+    mutate: overrides.mutate ?? vi.fn(),
+    isPending: overrides.isPending ?? false,
+  } as unknown as ReturnType<typeof useCreateAutomationRule>;
+}
+
 function makeDefaultAutomationsMock(overrides: Partial<{ data: AutomationRule[]; isLoading: boolean; isError: boolean }> = {}) {
   return {
     data: [],
@@ -146,12 +156,11 @@ function renderPanel(
     rules?: AutomationRule[];
     isLoading?: boolean;
     deleteMock?: ReturnType<typeof useDeleteAutomationRule>;
+    createMock?: ReturnType<typeof useCreateAutomationRule>;
     onClose?: () => void;
-    onAddRule?: () => void;
   } = {},
 ) {
   const onClose = overrides.onClose ?? vi.fn();
-  const onAddRule = overrides.onAddRule ?? vi.fn();
 
   mockUseAutomationRules.mockReturnValue(
     makeDefaultAutomationsMock({
@@ -164,17 +173,20 @@ function renderPanel(
     overrides.deleteMock ?? makeDefaultDeleteMock(),
   );
 
+  mockUseCreateAutomationRule.mockReturnValue(
+    overrides.createMock ?? makeDefaultCreateMock(),
+  );
+
   render(
     <AutomationsPanel
       boardId="board-1"
       onClose={onClose}
-      onAddRule={onAddRule}
       columns={fixtureColumns}
       labels={fixtureLabels}
     />,
   );
 
-  return { onClose, onAddRule };
+  return { onClose };
 }
 
 function renderBoardHeader(automationsOpen: boolean, onAutomationsToggle = vi.fn()) {
@@ -335,6 +347,20 @@ describe('AutomationsPanel and BoardHeader', () => {
   });
 
   // -------------------------------------------------------------------------
+  // Phase 2: clicking "Add rule" opens the form
+  // -------------------------------------------------------------------------
+
+  it('clicking "Add rule" in empty state reveals the rule creation form', () => {
+    mockUseCreateAutomationRule.mockReturnValue(makeDefaultCreateMock());
+    renderPanel({ rules: [] });
+
+    fireEvent.click(screen.getByRole('button', { name: /add rule/i }));
+
+    // Form should be visible (contains Save rule button)
+    expect(screen.getByRole('button', { name: /save rule/i })).toBeInTheDocument();
+  });
+
+  // -------------------------------------------------------------------------
   // BoardView — panel mutual exclusion
   // -------------------------------------------------------------------------
 
@@ -415,5 +441,156 @@ describe('AutomationsPanel and BoardHeader', () => {
     expect(screen.getByRole('complementary', { name: 'Activity' })).toBeInTheDocument();
     // Automations panel should now be closed
     expect(screen.queryByRole('complementary', { name: 'Automations' })).not.toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase 3: Rule Creation Form
+// ---------------------------------------------------------------------------
+
+describe('AutomationRuleForm', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // Helper: open the form by rendering the panel and clicking "Add rule"
+  function renderPanelWithForm(createMockOverrides: Partial<{ mutate: ReturnType<typeof vi.fn>; isPending: boolean }> = {}) {
+    const createMock = makeDefaultCreateMock(createMockOverrides);
+    mockUseCreateAutomationRule.mockReturnValue(createMock);
+    renderPanel({ rules: [], createMock });
+    fireEvent.click(screen.getByRole('button', { name: /add rule/i }));
+    return { createMock };
+  }
+
+  it('Save rule button is disabled and shows spinner while mutation isPending', () => {
+    const createMock = makeDefaultCreateMock({ isPending: true });
+    mockUseCreateAutomationRule.mockReturnValue(createMock);
+    renderPanel({ rules: [], createMock });
+    fireEvent.click(screen.getByRole('button', { name: /add rule/i }));
+
+    const saveBtn = screen.getByRole('button', { name: /saving/i });
+    expect(saveBtn).toBeDisabled();
+    expect(saveBtn).toHaveAttribute('aria-busy', 'true');
+  });
+
+  it('shows "Select a trigger type" error when Save clicked with no trigger type', () => {
+    renderPanelWithForm();
+
+    fireEvent.click(screen.getByRole('button', { name: /save rule/i }));
+
+    expect(screen.getByText('Select a trigger type')).toBeInTheDocument();
+  });
+
+  it('shows "Select a column to watch" when card_moved_to_column selected but no column chosen', () => {
+    renderPanelWithForm();
+
+    fireEvent.change(screen.getByLabelText(/when…/i), { target: { value: 'card_moved_to_column' } });
+    fireEvent.click(screen.getByRole('button', { name: /save rule/i }));
+
+    // Matches the error <span>, not the option placeholder with same text
+    expect(screen.getByText('Select a column to watch', { selector: 'span' })).toBeInTheDocument();
+  });
+
+  it('shows "Select a label to apply" when assign_label action selected but no label chosen', () => {
+    renderPanelWithForm();
+
+    fireEvent.change(screen.getByLabelText(/when…/i), { target: { value: 'card_moved_to_column' } });
+    fireEvent.change(screen.getByLabelText(/column/i), { target: { value: 'col-1' } });
+    fireEvent.change(screen.getByLabelText(/then…/i), { target: { value: 'assign_label' } });
+    fireEvent.click(screen.getByRole('button', { name: /save rule/i }));
+
+    // Matches the error <span>, not the option placeholder with same text
+    expect(screen.getByText('Select a label to apply', { selector: 'span' })).toBeInTheDocument();
+  });
+
+  it('calls mutation with correct data and shows toast.success on successful submit', () => {
+    const mutate = vi.fn().mockImplementation((_data, opts?: { onSuccess?: () => void }) => {
+      opts?.onSuccess?.();
+    });
+    renderPanelWithForm({ mutate });
+
+    fireEvent.change(screen.getByLabelText(/when…/i), { target: { value: 'card_moved_to_column' } });
+    fireEvent.change(screen.getByDisplayValue('Select a column to watch'), { target: { value: 'col-1' } });
+    fireEvent.change(screen.getByLabelText(/then…/i), { target: { value: 'assign_label' } });
+    fireEvent.change(screen.getByDisplayValue('Select a label to apply'), { target: { value: 'lbl-1' } });
+    fireEvent.click(screen.getByRole('button', { name: /save rule/i }));
+
+    expect(mutate).toHaveBeenCalledWith(
+      {
+        triggerType: 'card_moved_to_column',
+        triggerConfig: { columnId: 'col-1' },
+        actionType: 'assign_label',
+        actionConfig: { labelId: 'lbl-1' },
+      },
+      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
+    );
+    expect(mockToast.success).toHaveBeenCalledWith('Automation rule saved');
+    // Form should close (Save rule button gone)
+    expect(screen.queryByRole('button', { name: /save rule/i })).not.toBeInTheDocument();
+  });
+
+  it('displays "This rule would create a circular automation loop" on 422 response', () => {
+    const mutate = vi.fn().mockImplementation((_data, opts?: { onError?: (e: Error) => void }) => {
+      opts?.onError?.(new Error('HTTP 422: Unprocessable Entity'));
+    });
+    renderPanelWithForm({ mutate });
+
+    fireEvent.change(screen.getByLabelText(/when…/i), { target: { value: 'card_moved_to_column' } });
+    // Trigger column select appears — select it by its specific id
+    fireEvent.change(screen.getByDisplayValue('Select a column to watch'), { target: { value: 'col-1' } });
+    fireEvent.change(screen.getByLabelText(/then…/i), { target: { value: 'move_to_column' } });
+    // Action column select appears — distinct from trigger column (which now shows "To Do")
+    fireEvent.change(screen.getByDisplayValue('Select a column to move to'), { target: { value: 'col-2' } });
+    fireEvent.click(screen.getByRole('button', { name: /save rule/i }));
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'This rule would create a circular automation loop',
+    );
+    // Form stays open
+    expect(screen.getByRole('button', { name: /save rule/i })).toBeInTheDocument();
+  });
+
+  it('shows toast.error and keeps form open on 5xx failure', () => {
+    const mutate = vi.fn().mockImplementation((_data, opts?: { onError?: (e: Error) => void }) => {
+      opts?.onError?.(new Error('HTTP 500: Internal Server Error'));
+    });
+    renderPanelWithForm({ mutate });
+
+    fireEvent.change(screen.getByLabelText(/when…/i), { target: { value: 'card_moved_to_column' } });
+    fireEvent.change(screen.getByDisplayValue('Select a column to watch'), { target: { value: 'col-1' } });
+    fireEvent.change(screen.getByLabelText(/then…/i), { target: { value: 'assign_label' } });
+    fireEvent.change(screen.getByDisplayValue('Select a label to apply'), { target: { value: 'lbl-1' } });
+    fireEvent.click(screen.getByRole('button', { name: /save rule/i }));
+
+    expect(mockToast.error).toHaveBeenCalledWith('Failed to save rule. Please try again.');
+    // Form stays open with inputs preserved
+    expect(screen.getByRole('button', { name: /save rule/i })).toBeInTheDocument();
+  });
+
+  it('shows column dropdown when card_moved_to_column selected; label dropdown for card_label_assigned', () => {
+    renderPanelWithForm();
+
+    // Select card_moved_to_column — column dropdown appears
+    fireEvent.change(screen.getByLabelText(/when…/i), { target: { value: 'card_moved_to_column' } });
+    expect(screen.getByLabelText(/^column$/i)).toBeInTheDocument();
+
+    // Change to card_label_assigned — label dropdown appears, column gone
+    fireEvent.change(screen.getByLabelText(/when…/i), { target: { value: 'card_label_assigned' } });
+    expect(screen.getByLabelText(/^label$/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/^column$/i)).not.toBeInTheDocument();
+  });
+
+  it('shows label dropdown when assign_label action; column dropdown for move_to_column action', () => {
+    renderPanelWithForm();
+
+    // Select assign_label action
+    fireEvent.change(screen.getByLabelText(/then…/i), { target: { value: 'assign_label' } });
+    // label dropdown for action appears
+    const labelDropdowns = screen.getAllByLabelText(/^label$/i);
+    expect(labelDropdowns.length).toBeGreaterThan(0);
+
+    // Change to move_to_column — column dropdown appears instead
+    fireEvent.change(screen.getByLabelText(/then…/i), { target: { value: 'move_to_column' } });
+    expect(screen.getByLabelText(/^column$/i)).toBeInTheDocument();
   });
 });

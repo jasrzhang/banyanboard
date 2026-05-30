@@ -1,13 +1,13 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import type { AutomationRule } from '../../types/domain';
 import { useAutomationRules } from '../../hooks/useAutomationRules';
 import { useDeleteAutomationRule } from '../../hooks/useDeleteAutomationRule';
+import { AutomationRuleForm } from './AutomationRuleForm';
 
 interface AutomationsPanelProps {
   boardId: string;
   onClose: () => void;
-  onAddRule: () => void;
   columns: Array<{ id: string; name: string }>;
   labels: Array<{ id: string; name: string; color: string; icon?: string | null }>;
 }
@@ -63,7 +63,8 @@ function ruleToString(
   return 'Automation rule';
 }
 
-export function AutomationsPanel({ boardId, onClose, onAddRule, columns, labels }: AutomationsPanelProps) {
+export function AutomationsPanel({ boardId, onClose, columns, labels }: AutomationsPanelProps) {
+  const [showForm, setShowForm] = useState(false);
   const { data: rules = [], isLoading } = useAutomationRules(boardId);
   const deleteRule = useDeleteAutomationRule(boardId);
 
@@ -88,21 +89,50 @@ export function AutomationsPanel({ boardId, onClose, onAddRule, columns, labels 
       aria-label="Automations"
       className="flex-shrink-0 w-80 border-l border-border bg-surface-card flex flex-col h-full overflow-hidden"
     >
-      {/* Panel header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border flex-shrink-0">
-        <h2 className="text-sm font-semibold text-text-primary">Automations</h2>
-        <button
-          type="button"
-          aria-label="Close automations panel"
-          onClick={onClose}
-          className="text-text-secondary hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 rounded"
-        >
-          ×
-        </button>
-      </div>
+      {/* Panel header — changes when form is open */}
+      {showForm ? (
+        <div className="flex items-center justify-between px-3 py-2 border-b border-border flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowForm(false)}
+            className="flex items-center gap-1 text-sm text-text-secondary hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 rounded"
+            aria-label="Back to rules list"
+          >
+            ← New rule
+          </button>
+          <button
+            type="button"
+            aria-label="Close automations panel"
+            onClick={onClose}
+            className="text-text-secondary hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 rounded"
+          >
+            ×
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between px-3 py-2 border-b border-border flex-shrink-0">
+          <h2 className="text-sm font-semibold text-text-primary">Automations</h2>
+          <button
+            type="button"
+            aria-label="Close automations panel"
+            onClick={onClose}
+            className="text-text-secondary hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 rounded"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
-      {/* Body */}
-      {isLoading ? (
+      {/* Body — form takeover or list/loading/empty */}
+      {showForm ? (
+        <AutomationRuleForm
+          boardId={boardId}
+          columns={columns}
+          labels={labels}
+          onCancel={() => setShowForm(false)}
+          onSuccess={() => setShowForm(false)}
+        />
+      ) : isLoading ? (
         <div className="flex justify-center p-4">
           <svg
             className="h-5 w-5 animate-spin text-text-secondary"
@@ -135,7 +165,7 @@ export function AutomationsPanel({ boardId, onClose, onAddRule, columns, labels 
           </p>
           <button
             type="button"
-            onClick={onAddRule}
+            onClick={() => setShowForm(true)}
             className="mt-2 px-3 py-1.5 rounded-md text-xs font-medium bg-primary text-primary-foreground hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 transition-colors duration-150"
           >
             Add rule
@@ -147,7 +177,7 @@ export function AutomationsPanel({ boardId, onClose, onAddRule, columns, labels 
           <div className="px-3 py-2 border-b border-border flex-shrink-0">
             <button
               type="button"
-              onClick={onAddRule}
+              onClick={() => setShowForm(true)}
               className="text-xs text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary rounded"
             >
               + Add rule
@@ -162,7 +192,7 @@ export function AutomationsPanel({ boardId, onClose, onAddRule, columns, labels 
                   key={rule.id}
                   className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border last:border-b-0 hover:bg-surface-sidebar"
                 >
-                  <span className="text-xs text-text-primary min-w-0 flex-1 truncate">{summary}</span>
+                  <span className="text-xs text-text-primary min-w-0 flex-1">{summary}</span>
                   <button
                     type="button"
                     aria-label="Delete rule"
