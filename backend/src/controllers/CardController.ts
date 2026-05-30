@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import type { CardService } from '../services/CardService.js';
 import type { ActivityService } from '../services/ActivityService.js';
+import type { AutomationService } from '../services/AutomationService.js';
 import { UpdateCardSchema } from '../schemas/cardSchemas.js';
 
 const uuidParam = z.string().uuid();
@@ -10,6 +11,7 @@ export class CardController {
   constructor(
     private readonly service: CardService,
     private readonly activityService: ActivityService,
+    private readonly automationService: AutomationService,
   ) {}
 
   update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -47,7 +49,7 @@ export class CardController {
 
       res.status(200).json(card);
 
-      // Fire activity event after responding (fire-and-forget)
+      // Fire activity event and automation evaluation after responding (fire-and-forget)
       if (preCtx) {
         const isMove =
           parsedBody.data.columnId !== undefined && parsedBody.data.columnId !== preCtx.columnId;
@@ -59,6 +61,16 @@ export class CardController {
             ? { cardTitle: card.title, fromColumnId: preCtx.columnId, toColumnId: card.columnId }
             : { cardTitle: card.title },
         });
+
+        if (isMove) {
+          void this.automationService
+            .evaluateCardMoved(preCtx.boardId, parsedId.data, card.columnId)
+            .catch((err: unknown) =>
+              req.logger.error('Automation evaluation unexpected error', {
+                error: err instanceof Error ? err.message : String(err),
+              }),
+            );
+        }
       }
     } catch (err) {
       next(err);

@@ -16,6 +16,9 @@ interface BoardHeaderProps {
   activityOpen: boolean;
   onActivityToggle: () => void;
   activityToggleRef?: Ref<HTMLButtonElement>;
+  automationsOpen: boolean;
+  onAutomationsToggle: () => void;
+  automationsToggleRef?: Ref<HTMLButtonElement>;
 }
 
 export function BoardHeader({
@@ -31,6 +34,9 @@ export function BoardHeader({
   activityOpen,
   onActivityToggle,
   activityToggleRef,
+  automationsOpen,
+  onAutomationsToggle,
+  automationsToggleRef,
 }: BoardHeaderProps) {
   return (
     <div className="bg-surface-card border-b border-border h-14 flex items-center px-4 gap-3 shrink-0">
@@ -71,6 +77,30 @@ export function BoardHeader({
             <polyline points="12 6 12 12 16 14" />
           </svg>
           Activity
+        </button>
+        <button
+          ref={automationsToggleRef}
+          type="button"
+          aria-pressed={automationsOpen}
+          aria-label="Toggle automations"
+          onClick={onAutomationsToggle}
+          className={`px-2.5 py-1 rounded-md text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 transition-colors duration-150 flex items-center gap-1 ${
+            automationsOpen
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-nav-hover text-text-secondary hover:bg-border'
+          }`}
+        >
+          <svg
+            className="h-3.5 w-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+            aria-hidden="true"
+          >
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+          Automations
         </button>
         <button
           type="button"

@@ -39,12 +39,10 @@ frontend/src/components/
 ├── board/        — BoardView, BoardHeader, Column, ColumnHeader
 ├── card/         — CardTile, CardModal, CardForm
 ├── activity/     — ActivityFeedPanel, ActivityEntry
-├── automation/   — AutomationsPanel (list, delete, Escape-to-close; manages showForm state internally), AutomationRuleForm (full-panel takeover form for rule creation)
+├── automation/   — AutomationsPanel (list, delete, Escape-to-close)
 ├── filters/      — SearchBar, LabelFilter, DateFilter
 └── ui/           — Reusable primitives
 ```
-
-Note: `AutomationsPanel` manages the "show form / show list" toggle internally via a `showForm` boolean. No external `onAddRule` callback is needed — `BoardView` does not pass one.
 
 ### Frontend Hooks
 
@@ -303,13 +301,6 @@ Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. F
 - **12-Factor config** — all environment-specific values via environment variables
 
 ## Recent Technology Changes
-
-### 2026-05-30 — TASK-007 Phase 3: Rule Creation Form
-
-- **What Changed**: Added `AutomationRuleForm` component (`frontend/src/components/automation/AutomationRuleForm.tsx`) — a full-panel takeover form with 4 controlled selects (trigger type, conditional trigger config, action type, conditional action config), client-side validation with inline error messages, `useCreateAutomationRule` mutation, and full accessibility wiring (`aria-busy`, `aria-invalid`, `aria-describedby`, focus-on-mount). `AutomationsPanel` now owns `showForm` state internally; the panel header switches between "Automations" list view and "← New rule [×]" form view. Removed the placeholder `onAddRule` prop from `BoardView`. Added 10 Phase 3 tests (150 total).
-- **Reason**: FEAT-007 Card Workflow Automation Phase 3 — provides the rule creation UI, completing the full Automations feature.
-- **Impact**: Users can now create automation rules through the panel form. Error handling covers 422 circular-loop detection (inline `role="alert"`) and 5xx/network errors (toast). The `onAddRule` external callback is gone — `AutomationsPanel` is fully self-contained.
-- **Migration Notes**: None — no DB schema changes in Phase 3.
 
 ### 2026-05-30 — TASK-007 Phase 2: Automations Panel frontend
 

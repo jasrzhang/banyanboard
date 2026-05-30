@@ -1,6 +1,6 @@
-// Integration tests for Cards API endpoints (POST card, PATCH card move, activity hooks).
+// Integration tests for Cards API endpoints (POST card, PATCH card move, activity hooks, automation triggers).
 // Requires a running PostgreSQL instance (docker compose up -d db).
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app.js';
 import { pool } from '../config/db.js';
@@ -192,6 +192,120 @@ describe('Cards API', () => {
       );
       expect(hook).toBeDefined();
       expect(hook?.boardId).toBe(boardId);
+    });
+  });
+
+  // ── Automation trigger hooks ──────────────────────────────────────────────────
+  // These tests verify that card operations fire the automation evaluation engine
+  // (fire-and-forget) without breaking the primary HTTP response.
+
+  describe('Automation trigger hooks', () => {
+    // Automation-specific fixtures: a dedicated card and a label for action targets
+    let autoLabelId: string;
+    let autoCardId: string;
+
+    beforeAll(async () => {
+      const labelRes = await pool.query<{ id: string }>(
+        "INSERT INTO labels (board_id, name, color) VALUES ($1, 'Auto Action Label', '#6d28d9') RETURNING id",
+        [boardId],
+      );
+      autoLabelId = labelRes.rows[0]!.id;
+
+      const cardRes = await pool.query<{ id: string }>(
+        "INSERT INTO cards (column_id, title, position) VALUES ($1, 'Auto Trigger Card', 5000) RETURNING id",
+        [columnId],
+      );
+      autoCardId = cardRes.rows[0]!.id;
+    });
+
+    // Reset card position and labels between tests; remove automation rules
+    beforeEach(async () => {
+      await pool.query('DELETE FROM automation_rules WHERE board_id = $1', [boardId]);
+      await pool.query('UPDATE cards SET column_id = $1 WHERE id = $2', [columnId, autoCardId]);
+      await pool.query('DELETE FROM card_labels WHERE card_id = $1', [autoCardId]);
+    });
+
+    it('PATCH /api/cards/:id with new columnId fires card_moved_to_column rule — primary op returns 200 and action executes', async () => {
+      // Rule: card moved to column2 → assign autoLabel
+      await pool.query(
+        `INSERT INTO automation_rules
+           (board_id, trigger_type, trigger_config, action_type, action_config, enabled)
+         VALUES ($1, 'card_moved_to_column', $2, 'assign_label', $3, true)`,
+        [
+          boardId,
+          JSON.stringify({ columnId: column2Id }),
+          JSON.stringify({ labelId: autoLabelId }),
+        ],
+      );
+
+      const res = await request(app)
+        .patch(`/api/cards/${autoCardId}`)
+        .send({ columnId: column2Id, position: 1000 });
+
+      // Primary operation must succeed regardless of rule evaluation
+      expect(res.status).toBe(200);
+
+      // Allow fire-and-forget evaluation to complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // The action (assign label) should have been applied
+      const labelCheck = await pool.query(
+        'SELECT label_id FROM card_labels WHERE card_id = $1 AND label_id = $2',
+        [autoCardId, autoLabelId],
+      );
+      expect(labelCheck.rows).toHaveLength(1);
+    });
+
+    it('PUT /api/cards/:id/labels fires card_label_assigned rule — primary op returns 200 and action executes', async () => {
+      // Rule: autoLabel assigned → move card to column2
+      await pool.query(
+        `INSERT INTO automation_rules
+           (board_id, trigger_type, trigger_config, action_type, action_config, enabled)
+         VALUES ($1, 'card_label_assigned', $2, 'move_to_column', $3, true)`,
+        [
+          boardId,
+          JSON.stringify({ labelId: autoLabelId }),
+          JSON.stringify({ columnId: column2Id }),
+        ],
+      );
+
+      const res = await request(app)
+        .put(`/api/cards/${autoCardId}/labels`)
+        .send({ labelIds: [autoLabelId] });
+
+      // Primary operation must succeed regardless of rule evaluation
+      expect(res.status).toBe(200);
+
+      // Allow fire-and-forget evaluation to complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // The action (move to column) should have been applied
+      const cardCheck = await pool.query<{ column_id: string }>(
+        'SELECT column_id FROM cards WHERE id = $1',
+        [autoCardId],
+      );
+      expect(cardCheck.rows[0]!.column_id).toBe(column2Id);
+    });
+
+    it('PATCH /api/cards/:id returns 200 even when rule evaluation fails (fire-and-forget tolerance)', async () => {
+      // Rule pointing at a non-existent label — evaluation will fail silently
+      await pool.query(
+        `INSERT INTO automation_rules
+           (board_id, trigger_type, trigger_config, action_type, action_config, enabled)
+         VALUES ($1, 'card_moved_to_column', $2, 'assign_label', $3, true)`,
+        [
+          boardId,
+          JSON.stringify({ columnId: column2Id }),
+          JSON.stringify({ labelId: '00000000-0000-0000-0000-000000000000' }),
+        ],
+      );
+
+      const res = await request(app)
+        .patch(`/api/cards/${autoCardId}`)
+        .send({ columnId: column2Id, position: 2000 });
+
+      // The primary PATCH must still return 200 even when rule eval throws
+      expect(res.status).toBe(200);
     });
   });
 });

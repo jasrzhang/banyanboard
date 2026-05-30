@@ -18,6 +18,7 @@
     "seed": "tsx src/scripts/seed.ts"
   },
   "dependencies": {
+    "banyanboard": "file:../../..",
     "dotenv": "^16.4.0",
     "express": "^4.21.0",
     "pg": "^8.13.0",

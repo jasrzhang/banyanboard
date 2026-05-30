@@ -27,6 +27,7 @@ import { BoardErrorPanel } from './BoardErrorPanel';
 import { ColumnSkeleton } from '../card/CardSkeleton';
 import { BoardHeader } from './BoardHeader';
 import { ActivityFeedPanel } from '../activity/ActivityFeedPanel';
+import { AutomationsPanel } from '../automation/AutomationsPanel';
 import { filterCards } from '../../utils/filterCards';
 
 interface BoardViewProps {
@@ -82,8 +83,10 @@ export function BoardView({ boardId }: BoardViewProps) {
   const [activeLabelIds, setActiveLabelIds] = useState<string[]>([]);
   const [activeDateFilter, setActiveDateFilter] = useState<'none' | 'overdue' | 'due-soon'>('none');
   const [activityOpen, setActivityOpen] = useState(false);
+  const [automationsOpen, setAutomationsOpen] = useState(false);
 
   const activityToggleRef = useRef<HTMLButtonElement>(null);
+  const automationsToggleRef = useRef<HTMLButtonElement>(null);
 
   const { data: board, isLoading, isError, error, refetch } = useBoard(boardId);
   const { mutate: moveCardMutation } = useMoveCard(boardId);
@@ -140,6 +143,11 @@ export function BoardView({ boardId }: BoardViewProps) {
   const closeActivityPanel = useCallback(() => {
     setActivityOpen(false);
     activityToggleRef.current?.focus();
+  }, []);
+
+  const closeAutomationsPanel = useCallback(() => {
+    setAutomationsOpen(false);
+    automationsToggleRef.current?.focus();
   }, []);
 
   const { data: allLabels = [] } = useLabels(boardId);
@@ -202,8 +210,17 @@ export function BoardView({ boardId }: BoardViewProps) {
         onDateFilterChange={toggleDateFilter}
         onClearFilters={clearFilters}
         activityOpen={activityOpen}
-        onActivityToggle={() => setActivityOpen((prev) => !prev)}
+        onActivityToggle={() => {
+          setActivityOpen((prev) => !prev);
+          setAutomationsOpen(false);
+        }}
         activityToggleRef={activityToggleRef}
+        automationsOpen={automationsOpen}
+        onAutomationsToggle={() => {
+          setAutomationsOpen((prev) => !prev);
+          setActivityOpen(false);
+        }}
+        automationsToggleRef={automationsToggleRef}
       />
       <div className="flex flex-row flex-1 overflow-hidden">
         <div className="flex-1 overflow-hidden relative">
@@ -241,6 +258,14 @@ export function BoardView({ boardId }: BoardViewProps) {
         </div>
         {activityOpen && (
           <ActivityFeedPanel boardId={boardId} onClose={closeActivityPanel} />
+        )}
+        {automationsOpen && board && (
+          <AutomationsPanel
+            boardId={boardId}
+            onClose={closeAutomationsPanel}
+            columns={board.columns.map((c) => ({ id: c.id, name: c.name }))}
+            labels={allLabels}
+          />
         )}
       </div>
     </div>

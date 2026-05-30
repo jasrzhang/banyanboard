@@ -163,20 +163,6 @@ JSON response → React renders columns and cards
 - **Trade-offs**: Two method names instead of one; eliminates runtime JSON-parse errors for bodyless responses.
 - **Example**: `frontend/src/api/automationsApi.ts` — `deleteAutomationRule()` uses `apiClient.deleteEmpty()`
 
-### Full-Panel Takeover Form Pattern — Inline Panel Forms
-
-- **Problem**: A side panel needs to toggle between a list view and a creation form without opening a separate modal or navigating away. The panel's DOM node stays mounted throughout.
-- **Implementation**: The panel component owns a `showForm` boolean via `useState`. When `true`, the panel body renders the form in place of the list; the panel header swaps to a "← Back [×]" row. No external callback is needed from the parent — the parent only controls whether the panel itself is open. Mirrors the `LabelPickerSection` `showCreate` pattern.
-- **Trade-offs**: Self-contained; parent stays simple. Form state is lost if the panel is closed and reopened (acceptable for creation flows).
-- **Example**: `frontend/src/components/automation/AutomationsPanel.tsx` + `AutomationRuleForm.tsx`
-
-### aria-busy Attribute Omission Pattern — Accessible Loading State
-
-- **Problem**: Setting `aria-busy="false"` explicitly is redundant — the default is already `false` — and can cause minor noise in accessibility trees. The attribute should only be present when the element is genuinely busy.
-- **Implementation**: Use `aria-busy={isPending || undefined}`. When `isPending` is `false`, the expression evaluates to `undefined`, which causes React to omit the attribute entirely from the DOM. When `isPending` is `true`, `aria-busy="true"` is rendered.
-- **Trade-offs**: Requires awareness that `false || undefined` = `undefined` in JS; the intent must be understood by readers. Worth it to keep the DOM clean.
-- **Example**: `frontend/src/components/automation/AutomationRuleForm.tsx`
-
 ### Mutual-Exclusion Side Panel Pattern — BoardView
 
 - **Problem**: Multiple slide-in panels (Activity, Automations) share the same layout slot in `BoardView`. Opening two panels simultaneously would break the layout and disorient the user.

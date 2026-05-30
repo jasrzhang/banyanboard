@@ -49,4 +49,16 @@ export const apiClient = {
   delete<T>(path: string, init?: RequestInit): Promise<T> {
     return request<T>(path, { ...init, method: 'DELETE' });
   },
+
+  async deleteEmpty(path: string, init?: RequestInit): Promise<void> {
+    const url = `${resolvedBaseUrl}${path}`;
+    const response = await fetch(url, {
+      ...init,
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', ...init?.headers },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+  },
 };
