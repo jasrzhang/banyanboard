@@ -3,8 +3,8 @@ name: "Learned: Architecture — Interface-First Design + Utility Extraction + S
 globs: ["src/types/*.ts", "src/config/*.ts", "src/events/*.ts", "*.ts", "frontend/src/**/*.ts", "frontend/src/**/*.tsx"]
 topics: ["architecture", "typescript", "interface-design", "utility-extraction", "frontend", "singleton", "event-hooks"]
 priority: medium
-evidence_count: 6
-last_updated: 2026-05-28
+evidence_count: 7
+last_updated: 2026-05-30
 auto_generated: true
 ---
 
@@ -16,6 +16,7 @@ auto_generated: true
 - Export shared singletons (emitters, pools, clients) as module-level `const` exports from a dedicated module file — this is simpler than parameterizing `createApp()` and avoids introducing a DI container for a single shared object.
 - Place event emission hooks (activity, audit, side-effects) in service methods rather than controllers so hooks are testable without Express context and survive transport-layer changes.
 - When a new resource's assignment endpoint belongs under an existing resource route (e.g., PUT /cards/:cardId/labels wired in cardsRouter), export the new controller as a named export from the new resource's route module and import it in the existing route module — keeps the service singleton single-sourced without modifying the existing module's DI wiring.
+- Delegate position calculation (append at MAX+gap, insert between) to the resource's own repository — never reimplement MAX+gap inline in a service that calls `move` or `reorder`, as duplicated position logic diverges across tasks.
 
 ## Evidence
 
@@ -27,3 +28,4 @@ auto_generated: true
 | `activityEmitter` exported as module-level `const` from `src/events/ActivityEventEmitter.ts` (mirroring the `pool` pattern from `config/db.ts`) — zero change to `createApp()` signature | [reflection-TASK-005.md](../reflection/reflection-TASK-005.md) | 2026-05-25 |
 | Event hooks placed in `ColumnController`/`CardController` rather than service layer — created a layering concern; service-layer placement is more testable and transport-agnostic | [reflection-TASK-005.md](../reflection/reflection-TASK-005.md) | 2026-05-25 |
 | `cardLabelController` exported from `routes/labels.ts` and imported in `routes/cards.ts` (same pattern as `activityService`) — the new controller is a named export from the new resource's route module, keeping `LabelService` singleton single-sourced | [reflection-TASK-006.md](../reflection/reflection-TASK-006.md) | 2026-05-28 |
+| `moveCardToColumn` in AutomationService initially appended at position 1 (bug). Correct pattern: read MAX position from repository, append at MAX+1000 — duplicate of TASK-003 insight; confirmed the rule applies to service-layer moves, not just controller-level moves | [reflection-TASK-007.md](../reflection/reflection-TASK-007.md) | 2026-05-30 |

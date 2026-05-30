@@ -126,3 +126,16 @@ Chronological record of pattern extraction and consolidation events from task re
 
 ### systemPatterns.md Updates
 - None (patterns are component-level coding practices, not system-level architecture patterns)
+
+---
+
+## 2026-05-30 - TASK-007 Reflection
+
+### Extracted Patterns
+- **testing-patterns** → amended `agent-rules/_learned/testing-patterns.md` (evidence count: 6) — Disambiguate validation error text vs `<select>` placeholder using `{ selector: 'span' }` / `getByDisplayValue()`
+- **testing-patterns** → amended `agent-rules/_learned/testing-patterns.md` (evidence count: 6) — Test mutually exclusive panels as a round-trip state invariant (open A→assert B absent, open B→assert A absent)
+- **architecture** → amended `agent-rules/_learned/architecture.md` (evidence count: 7) — Delegate resource position calculation to the resource's own repository; never reimplement MAX+gap inline in service-layer move methods
+- **ui-patterns** → amended `agent-rules/_learned/ui-patterns.md` (evidence count: 3) — Add `deleteEmpty()` to API client for DELETE endpoints returning 204 No Content; calling `.json()` on 204 throws
+
+### systemPatterns.md Updates
+- None (patterns are coding-level practices, not novel system-level architectural boundaries)

@@ -20,6 +20,7 @@
 - Search cards by title; filter by label or due date
 - Card detail modal for full task inspection and editing
 - Horizontally scrollable board layout with sidebar navigation
+- Card workflow automation rules: create, view, and delete per-board trigger/action rules via the Automations panel in the board header (all 3 phases complete: backend API, panel with rule list and delete, rule creation form with validation and 422 circular-loop error handling)
 
 ## Markets Serviced
 
@@ -298,7 +299,9 @@ src/
 | 2026-05-16 | /banyan-init | Initial creation |
 | 2026-05-16 | User | Populated with BanyanBoard context — Kanban board for small teams |
 | 2026-05-16 | User | Frontend supplement: design language, layout, component architecture, tech stack |
+| 2026-05-30 | Documentation Agent | TASK-007 Phase 2: added Card Workflow Automation panel to Key Functionality |
+| 2026-05-30 | Documentation Agent | TASK-007 Phase 3: updated Automations entry to reflect rule creation now complete |
 
 ## Last Refreshed
 
-2026-05-16 (frontend supplement applied)
+2026-05-30 (TASK-007 Phase 3: full Automations feature complete — create, view, delete)

@@ -31,6 +31,29 @@ db/
 
 - Shared TypeScript types (Card, Board, Column) — inlined in `frontend/src/types/domain.ts` (CE-6 decision: no shared workspace for MVP)
 
+### Frontend Component Directories
+
+```
+frontend/src/components/
+├── layout/       — Sidebar, AppShell
+├── board/        — BoardView, BoardHeader, Column, ColumnHeader
+├── card/         — CardTile, CardModal, CardForm
+├── activity/     — ActivityFeedPanel, ActivityEntry
+├── automation/   — AutomationsPanel (list, delete, Escape-to-close; manages showForm state internally), AutomationRuleForm (full-panel takeover form for rule creation)
+├── filters/      — SearchBar, LabelFilter, DateFilter
+└── ui/           — Reusable primitives
+```
+
+Note: `AutomationsPanel` manages the "show form / show list" toggle internally via a `showForm` boolean. No external `onAddRule` callback is needed — `BoardView` does not pass one.
+
+### Frontend Hooks
+
+| Hook | Key | Purpose |
+|---|---|---|
+| `useAutomationRules` | `['automations', boardId]` | TanStack Query fetch for automation rules on a board |
+| `useCreateAutomationRule` | — | Mutation; invalidates `['automations', boardId]` on success |
+| `useDeleteAutomationRule` | — | Mutation; invalidates `['automations', boardId]` on success |
+
 ## Development Commands
 
 ### Local Development
@@ -200,6 +223,13 @@ npm run format --prefix frontend
 - `PATCH  /api/boards/:boardId/labels/:labelId` — update label name/color/icon; 404 on wrong-board
 - `DELETE /api/boards/:boardId/labels/:labelId` — delete label (CASCADE removes card_labels); 404 on wrong-board
 
+**REST endpoints added (TASK-007 Phase 1 — Automation Rules backend):**
+- `GET    /api/boards/:boardId/automations` — list automation rules for a board
+- `POST   /api/boards/:boardId/automations` — create an automation rule
+- `DELETE /api/boards/:boardId/automations/:ruleId` — delete a rule; returns **204 No Content**
+
+The DELETE endpoint returns 204 with no body. Frontend uses `apiClient.deleteEmpty()` for this route.
+
 ### Infrastructure & Deployment
 
 - Docker Compose — orchestrates frontend dev server, backend, and PostgreSQL
@@ -274,6 +304,20 @@ Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. F
 
 ## Recent Technology Changes
 
+### 2026-05-30 — TASK-007 Phase 3: Rule Creation Form
+
+- **What Changed**: Added `AutomationRuleForm` component (`frontend/src/components/automation/AutomationRuleForm.tsx`) — a full-panel takeover form with 4 controlled selects (trigger type, conditional trigger config, action type, conditional action config), client-side validation with inline error messages, `useCreateAutomationRule` mutation, and full accessibility wiring (`aria-busy`, `aria-invalid`, `aria-describedby`, focus-on-mount). `AutomationsPanel` now owns `showForm` state internally; the panel header switches between "Automations" list view and "← New rule [×]" form view. Removed the placeholder `onAddRule` prop from `BoardView`. Added 10 Phase 3 tests (150 total).
+- **Reason**: FEAT-007 Card Workflow Automation Phase 3 — provides the rule creation UI, completing the full Automations feature.
+- **Impact**: Users can now create automation rules through the panel form. Error handling covers 422 circular-loop detection (inline `role="alert"`) and 5xx/network errors (toast). The `onAddRule` external callback is gone — `AutomationsPanel` is fully self-contained.
+- **Migration Notes**: None — no DB schema changes in Phase 3.
+
+### 2026-05-30 — TASK-007 Phase 2: Automations Panel frontend
+
+- **What Changed**: Added `AutomationsPanel` component (`frontend/src/components/automation/`), three TanStack Query hooks (`useAutomationRules`, `useCreateAutomationRule`, `useDeleteAutomationRule`), `automationsApi.ts` API client module, and `AutomationRule` domain type. Extended `apiClient` with `deleteEmpty()` for 204 No Content DELETE responses. Added Automations toggle button to `BoardHeader` and mutual-exclusion panel logic to `BoardView`. Extended `ActivityEntry` with an `automation_triggered` event case.
+- **Reason**: FEAT-007 Card Workflow Automation Phase 2 — provides the UI panel for viewing, managing, and deleting automation rules on a board.
+- **Impact**: Users can open the Automations panel from the board header, see all rules, and delete individual rules. Opening the Automations panel closes the Activity panel (and vice versa).
+- **Migration Notes**: None — no DB schema changes in Phase 2.
+
 ### 2026-05-27 — TASK-006 Phase 1: Label CRUD API backend
 
 - **What Changed**: Added board-scoped label CRUD API (`GET/POST/PATCH/DELETE /api/boards/:boardId/labels`), `LabelRepository`, `LabelService`, `LabelController`, `labelsRouter`, `labelSchemas.ts`. Applied migration `1747600006000_add-icon-to-labels.js` to add nullable `icon VARCHAR(10)` column. Updated `BoardRepository.findByIdWithColumnsAndCards` to include `icon` in nested label json.
@@ -312,7 +356,7 @@ Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. F
   - **Styles**: TailwindCSS v3 with semantic design tokens (surface, primary, border, text, nav, label palette — see TASK-002-app-shell-uiux.md)
   - **Font**: Inter via `@fontsource/inter` (self-hosted, no CDN)
   - **Logger**: `src/utils/logger.ts` thin env-aware wrapper (no-console ESLint rule with per-file exemption)
-  - **API client**: `src/api/apiClient.ts` typed fetch wrapper (`get/post/patch/delete`); reads `VITE_API_BASE_URL` with fallback to `http://localhost:3001` + logger.warn
+  - **API client**: `src/api/apiClient.ts` typed fetch wrapper (`get/post/patch/delete/deleteEmpty`); reads `VITE_API_BASE_URL` with fallback to `http://localhost:3001` + logger.warn. `deleteEmpty()` handles DELETE endpoints that return 204 No Content (no JSON body expected).
   - **Testing**: Vitest v2 + React Testing Library v16 + jsdom; `globals: true`
   - **ESLint**: v9 flat config matching backend pattern; `no-console: error` in src
   - **Docker**: `frontend/Dockerfile` (multi-stage); `docker-compose.yml` frontend service; dev override with bind-mount hot-reload

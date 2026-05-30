@@ -156,6 +156,34 @@ JSON response → React renders columns and cards
 - **Trade-offs**: Event emission is best-effort — a DB failure will log an error but the card operation has already succeeded. This is intentional for MVP resilience.
 - **Example**: `backend/src/controllers/ColumnController.ts` (card_created), `backend/src/controllers/CardController.ts` (card_moved / card_updated)
 
+### deleteEmpty() — 204 No Content DELETE Responses
+
+- **Problem**: The standard `apiClient.delete()` method expects a JSON body in the response. DELETE endpoints that return 204 No Content have no body, so attempting to call `.json()` on the response throws a parse error.
+- **Implementation**: `apiClient.deleteEmpty()` issues the DELETE request and resolves with `void` without calling `.json()`. Callers signal intent explicitly by choosing between `delete()` (body expected) and `deleteEmpty()` (no body).
+- **Trade-offs**: Two method names instead of one; eliminates runtime JSON-parse errors for bodyless responses.
+- **Example**: `frontend/src/api/automationsApi.ts` — `deleteAutomationRule()` uses `apiClient.deleteEmpty()`
+
+### Full-Panel Takeover Form Pattern — Inline Panel Forms
+
+- **Problem**: A side panel needs to toggle between a list view and a creation form without opening a separate modal or navigating away. The panel's DOM node stays mounted throughout.
+- **Implementation**: The panel component owns a `showForm` boolean via `useState`. When `true`, the panel body renders the form in place of the list; the panel header swaps to a "← Back [×]" row. No external callback is needed from the parent — the parent only controls whether the panel itself is open. Mirrors the `LabelPickerSection` `showCreate` pattern.
+- **Trade-offs**: Self-contained; parent stays simple. Form state is lost if the panel is closed and reopened (acceptable for creation flows).
+- **Example**: `frontend/src/components/automation/AutomationsPanel.tsx` + `AutomationRuleForm.tsx`
+
+### aria-busy Attribute Omission Pattern — Accessible Loading State
+
+- **Problem**: Setting `aria-busy="false"` explicitly is redundant — the default is already `false` — and can cause minor noise in accessibility trees. The attribute should only be present when the element is genuinely busy.
+- **Implementation**: Use `aria-busy={isPending || undefined}`. When `isPending` is `false`, the expression evaluates to `undefined`, which causes React to omit the attribute entirely from the DOM. When `isPending` is `true`, `aria-busy="true"` is rendered.
+- **Trade-offs**: Requires awareness that `false || undefined` = `undefined` in JS; the intent must be understood by readers. Worth it to keep the DOM clean.
+- **Example**: `frontend/src/components/automation/AutomationRuleForm.tsx`
+
+### Mutual-Exclusion Side Panel Pattern — BoardView
+
+- **Problem**: Multiple slide-in panels (Activity, Automations) share the same layout slot in `BoardView`. Opening two panels simultaneously would break the layout and disorient the user.
+- **Implementation**: `BoardView` holds one `boolean` state flag per panel (`activityOpen`, `automationsOpen`). Each panel's open handler explicitly sets the other flag to `false` before setting its own flag to `true`. A shared `closeAutomationsPanel` callback is passed down to `AutomationsPanel` so the child can close itself (e.g., on Escape key).
+- **Trade-offs**: Straightforward boolean logic; add a new flag for each new panel. Scale limit: if 4+ panels are added, a single `activePanel: string | null` discriminant would be cleaner.
+- **Example**: `frontend/src/components/board/BoardView.tsx`
+
 ### Pre-Update Context Capture — Semantic Event Typing
 
 - **Problem**: To distinguish `card_moved` from `card_updated`, the controller needs the card's previous `columnId` before the PATCH is applied.
@@ -201,6 +229,17 @@ JSON response → React renders columns and cards
 - **What is NOT tested**: Docker healthcheck timing (environmental/non-deterministic), TypeScript compilation (covered by `tsc --noEmit`), ESLint rule configuration itself, third-party library internals (express routing, pg driver)
 
 <!-- AUTO-MANAGED: c4-architecture-start -->
+
+## Webhook Delivery Pattern
+
+When a trigger with webhook configuration fires:
+
+1. Trigger execution completes first (decoupled from delivery)
+2. Webhook delivery queued as separate async job
+3. Delivery attempts: max 3, 30-second backoff between attempts
+4. Delivery record: { rule_id, attempt_count, status,
+   http_response_code, error, created_at }
+5. Status lifecycle: pending → delivered | failed → exhausted
 
 ## C4 Architecture
 
