@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-export type ActivityEventType = 'card_created' | 'card_moved' | 'card_updated' | 'card_deleted';
+export type ActivityEventType = 'card_created' | 'card_moved' | 'card_updated' | 'card_deleted' | 'automation_triggered';
 
 export interface ActivityEvent {
   boardId: string;

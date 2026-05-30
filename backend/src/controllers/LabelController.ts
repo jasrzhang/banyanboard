@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import type { LabelService } from '../services/LabelService.js';
 import { DuplicateLabelError, InvalidLabelAssignmentError } from '../services/LabelService.js';
+import type { AutomationService } from '../services/AutomationService.js';
 import { CreateLabelSchema, ReplaceCardLabelsSchema, UpdateLabelSchema } from '../schemas/labelSchemas.js';
 
 const uuidParam = z.string().uuid();
@@ -158,7 +159,10 @@ export class LabelController {
 }
 
 export class CardLabelController {
-  constructor(private readonly service: LabelService) {}
+  constructor(
+    private readonly service: LabelService,
+    private readonly automationService: AutomationService,
+  ) {}
 
   replace = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -203,6 +207,15 @@ export class CardLabelController {
       });
 
       res.status(200).json({ labels: result.labels });
+
+      // Fire automation evaluation after responding (fire-and-forget)
+      if (result.added.length > 0) {
+        void this.automationService
+          .evaluateLabelAssigned(result.boardId, result.cardId, result.added)
+          .catch((err: unknown) =>
+            req.logger.error('Automation evaluation error', err instanceof Error ? err : undefined),
+          );
+      }
     } catch (err) {
       if (err instanceof InvalidLabelAssignmentError) {
         res.status(400).json({

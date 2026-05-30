@@ -162,9 +162,11 @@ npm run format --prefix frontend
 | `activity_events` | uuid | board_id (FK CASCADE), card_id (FK SET NULL), event_type text, payload jsonb, created_at timestamptz |
 | `labels` | uuid | board_id (FK CASCADE), name text, color text, icon varchar(10) nullable; UNIQUE(board_id, name) |
 | `card_labels` | — | card_id (FK CASCADE), label_id (FK CASCADE); composite PK |
+| `automation_rules` | uuid | board_id (FK CASCADE), trigger_type text, trigger_config jsonb, action_type text, action_config jsonb, enabled boolean, created_at timestamptz |
 
 `activity_events` has a composite index on `(board_id, created_at DESC)` for efficient feed queries. Migration: `1747600005000_create-activity-events.js`.
 `labels` and `card_labels` migrations: `1747600003000_create-labels.js`, `1747600004000_create-card-labels.js`. `icon` column added by `1747600006000_add-icon-to-labels.js` (TASK-006 Phase 1).
+`automation_rules` index on `board_id` supports board-scoped list/evaluate queries. trigger_config and action_config are JSONB so new trigger/action types can be added without schema changes. Migration: `1747600007000_create-automation-rules.js`.
 
 ### API & Communication
 
@@ -199,6 +201,21 @@ npm run format --prefix frontend
 - `POST   /api/boards/:boardId/labels` — create a new board label; 409 on duplicate name
 - `PATCH  /api/boards/:boardId/labels/:labelId` — update label name/color/icon; 404 on wrong-board
 - `DELETE /api/boards/:boardId/labels/:labelId` — delete label (CASCADE removes card_labels); 404 on wrong-board
+
+**Backend API modules (TASK-007 Phase 1 — Automation Rules):**
+
+| Module | Path | Purpose |
+|---|---|---|
+| `AutomationRepository` | `src/repositories/AutomationRepository.ts` | CRUD for `automation_rules` table; `findEnabledByTrigger`, `findEnabledByLabelTrigger` for rule evaluation; `assignLabel`, `moveCardToColumn` action side-effects |
+| `AutomationService` | `src/services/AutomationService.ts` | Rule CRUD + 2-hop cycle detection; `evaluateCardMoved` and `evaluateLabelAssigned` for fire-and-forget trigger evaluation |
+| `AutomationController` | `src/controllers/AutomationController.ts` | HTTP layer: maps `CircularRuleError` → 422 with `CIRCULAR_RULE_DETECTED` code; `NotFoundError` → 404 |
+| `automationsRouter` | `src/routes/automations.ts` | Mounted at `app.use('/api/boards', automationsRouter)`; exports `automationService` singleton for cross-route import |
+| `automationSchemas` | `src/schemas/automationSchemas.ts` | Zod `CreateAutomationRuleSchema` with `superRefine` cross-field validation (required config keys per trigger/action type) |
+
+**REST endpoints added (TASK-007 Phase 1):**
+- `GET    /api/boards/:boardId/automations` — list all automation rules for a board (ordered by created_at ASC)
+- `POST   /api/boards/:boardId/automations` — create a rule; 400 on schema violation; 422 with `CIRCULAR_RULE_DETECTED` on 2-hop move loop
+- `DELETE /api/boards/:boardId/automations/:ruleId` — delete a rule scoped to the board; 404 on not-found or wrong-board
 
 ### Infrastructure & Deployment
 
@@ -273,6 +290,13 @@ Phase 5 ships the Logger interface + W3C Trace Context correlation middleware. F
 - **12-Factor config** — all environment-specific values via environment variables
 
 ## Recent Technology Changes
+
+### 2026-05-30 — TASK-007 Phase 1: Automation Rules backend foundation
+
+- **What Changed**: Added `automation_rules` table (migration `1747600007000_create-automation-rules.js`), `AutomationRepository`, `AutomationService`, `AutomationController`, `automationsRouter`, and `automationSchemas.ts`. Extended `CardController` and `CardLabelController` with fire-and-forget automation evaluation hooks. Registered `automationsRouter` in `app.ts`.
+- **Reason**: FEAT-007 Card Workflow Automation Phase 1 — provides the rule storage and evaluation engine required by future frontend automation UI.
+- **Impact**: Card move and label-assign operations now trigger matched automation rules (assign label, move to column, notify) after the HTTP response completes. Circular 2-hop column-move rules are rejected at creation time. New `automation_triggered` activity events appear in the activity feed when a rule fires.
+- **Migration Notes**: Run `npm run migrate --prefix backend` to apply `1747600007000_create-automation-rules.js`.
 
 ### 2026-05-27 — TASK-006 Phase 1: Label CRUD API backend
 

@@ -8,3 +8,4 @@
 | TASK-004 | Card Detail Modal + Search/Filter | ARCHIVE | COMPLETE | FEAT-004 |
 | TASK-005 | Realtime Activity Feed | ARCHIVE | COMPLETE | FEAT-005 |
 | TASK-006 | Card Labels | ARCHIVE | COMPLETE | FEAT-006 |
+| TASK-007 | Card Workflow Automation | BUILD | Phase 1/3 | FEAT-007 |

@@ -63,10 +63,11 @@ All services orchestrated via Docker Compose for local development.
 
 - **React Frontend**: Renders boards, columns, and cards. Handles drag-and-drop interactions. Calls REST API. No business logic beyond UI state.
 - **Express Backend**: Routes → Controllers → Services → Repositories. Validates input, enforces auth, delegates to service layer.
-- **Service Layer**: Business logic — e.g., column ordering, due date validation, label management, activity event recording.
-- **Repository Layer**: SQL queries via `pg`. One repository per domain entity (BoardRepository, ColumnRepository, CardRepository, ActivityRepository).
+- **Service Layer**: Business logic — e.g., column ordering, due date validation, label management, activity event recording, automation rule evaluation.
+- **Repository Layer**: SQL queries via `pg`. One repository per domain entity (BoardRepository, ColumnRepository, CardRepository, ActivityRepository, AutomationRepository).
 - **ActivityEventEmitter**: In-process typed event bus for activity events. Decouples event producers (controllers) from consumers (SSE route, future subscribers).
-- **PostgreSQL**: Source of truth for all boards, columns, cards, users, labels, and activity events.
+- **AutomationService**: Evaluates automation rules triggered by card moves and label assignments (fire-and-forget). Enforces 2-hop cycle detection at rule creation time.
+- **PostgreSQL**: Source of truth for all boards, columns, cards, users, labels, activity events, and automation rules.
 
 ### Data Flow Patterns
 
@@ -90,6 +91,44 @@ BoardRepository.findWithColumnsAndCards() →
 JOIN query (boards + columns + cards) →
 JSON response → React renders columns and cards
 ```
+
+#### Automation Rule Evaluation (Card Move Trigger)
+
+```
+User moves card → PATCH /api/cards/:id { columnId, position } →
+CardController validates → CardService.updateCard() → DB →
+res.json(200) → client receives response immediately
+  ↓ (fire-and-forget, after response)
+AutomationService.evaluateCardMoved(boardId, cardId, toColumnId) →
+  AutomationRepo.findEnabledByTrigger() → matched rules →
+  for each rule: executeAction() →
+    assign_label  → AutomationRepo.assignLabel() (ON CONFLICT DO NOTHING)
+    move_to_column → AutomationRepo.moveCardToColumn()
+    notify        → (no side-effect yet)
+  ActivityService.recordEvent(automation_triggered) → DB
+  per-rule failure: logger.warn(RULE_EXECUTION_FAILED), continue to next rule
+```
+
+- **Trigger**: Card PATCH with a new `columnId`
+- **Steps**: Post-response evaluation; rules matched by `(boardId, triggerType, trigger_config->>columnId)`
+- **Output**: Label assigned / card moved / activity event recorded; primary response unaffected
+
+#### Automation Rule Evaluation (Label Assign Trigger)
+
+```
+User assigns labels → PUT /api/cards/:id/labels { labelIds } →
+CardLabelController validates → LabelService.replaceCardLabels() → DB →
+res.json(200) → client receives response immediately
+  ↓ (fire-and-forget, only for newly-added label IDs)
+AutomationService.evaluateLabelAssigned(boardId, cardId, addedLabelIds) →
+  for each addedLabelId:
+    AutomationRepo.findEnabledByLabelTrigger() → matched rules →
+    for each rule: executeAction() → (same dispatch as above)
+```
+
+- **Trigger**: `PUT /api/cards/:id/labels` where at least one label is newly added
+- **Steps**: Only the delta (added labels) is evaluated, not the full post-update set
+- **Output**: Same action dispatch as card-move trigger
 
 ## Design Patterns Used
 
@@ -169,6 +208,36 @@ JSON response → React renders columns and cards
 - **Implementation**: `src/routes/activity.ts` creates the `activityService` singleton and exports it by name. `src/routes/columns.ts` and `src/routes/cards.ts` import it from the activity route module. No class-level DI container needed.
 - **Trade-offs**: Route modules gain a mild coupling to each other; acceptable at MVP scale. Eliminates the need for a DI framework.
 - **Example**: `backend/src/routes/activity.ts` (export), `backend/src/routes/columns.ts` + `cards.ts` (import)
+
+### automationService Singleton Export — Same Pattern for Automation Cross-Route DI
+
+- **Problem**: `CardController` (card moves) and `CardLabelController` (label assigns) both need `automationService`. Mirrors the same cross-route DI problem as `activityService`.
+- **Implementation**: `src/routes/automations.ts` creates and exports `automationService`. `src/routes/cards.ts` imports it from the automations route module. `src/routes/labels.ts` passes it into `CardLabelController` at construction time.
+- **Trade-offs**: Consistent with the established activityService pattern. Adds one more cross-route coupling, which remains acceptable at MVP scale.
+- **Example**: `backend/src/routes/automations.ts` (export), `backend/src/routes/cards.ts` + `labels.ts` (import)
+
+### Fire-and-Forget Automation Evaluation — Non-Blocking Rule Execution
+
+- **Problem**: Automation rule evaluation (DB query + action + activity event write) must not delay the HTTP response. A stale or failing rule must never cause the primary card operation to fail.
+- **Implementation**: `CardController.update()` calls `automationService.evaluateCardMoved()` after `res.json()` via `void promise.catch(logger.error)`. `CardLabelController.replace()` does the same for `evaluateLabelAssigned()`. Both evaluate methods catch per-rule failures internally and log `RULE_EXECUTION_FAILED` at warn level rather than propagating.
+- **Trade-offs**: Rule execution is best-effort — failures are observable via logs but do not affect the client. Consistent with the existing fire-and-forget activity hook pattern.
+- **Example**: `backend/src/controllers/CardController.ts`, `backend/src/controllers/LabelController.ts`
+
+### 2-Hop Cycle Detection — Automation Rule Guard
+
+- **Problem**: A `card_moved_to_column → move_to_column` rule where column A triggers a move to B, and a second rule where B triggers a move back to A, would cause an infinite evaluation loop.
+- **Implementation**: `AutomationService.createRule()` fetches all existing `card_moved_to_column → move_to_column` rules for the board and checks whether the new rule would form a reverse pair with any existing rule. Throws `CircularRuleError` (mapped to HTTP 422) if a cycle is detected.
+- **Trade-offs**: Only 2-hop direct loops are caught. Multi-hop cycles (A→B→C→A) are not detected in MVP — documented as a TODO in the service code.
+- **Example**: `backend/src/services/AutomationService.ts` (createRule)
+
+## Recent Architecture Changes
+
+### 2026-05-30 — TASK-007 Phase 1: Automation Rule Evaluation Engine
+
+- **What Changed**: Introduced `AutomationService` as a new service-layer component responsible for rule evaluation. Extended `CardController` and `CardLabelController` with fire-and-forget evaluation hooks. Added `automationService` singleton export to `routes/automations.ts` following the established activityService singleton pattern. Board-scoped automation CRUD endpoints added (`GET/POST/DELETE /api/boards/:boardId/automations`).
+- **Reason**: Backend foundation for FEAT-007 Card Workflow Automation. Evaluation runs post-response so rule failures are isolated from primary operations.
+- **Trade-offs**: Best-effort rule execution (failures logged, not surfaced). 2-hop cycle detection only; multi-hop left for future work.
+- **Affected Components**: AutomationRepository, AutomationService, AutomationController, automationsRouter, CardController, LabelController (CardLabelController), routes/cards.ts, routes/labels.ts, app.ts
 
 ## Integration Patterns
 

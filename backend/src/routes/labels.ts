@@ -3,11 +3,12 @@ import { pool } from '../config/db.js';
 import { LabelRepository } from '../repositories/LabelRepository.js';
 import { LabelService } from '../services/LabelService.js';
 import { CardLabelController, LabelController } from '../controllers/LabelController.js';
+import { automationService } from './automations.js';
 
 const labelRepo = new LabelRepository(pool);
 const service = new LabelService(labelRepo);
 const labelController = new LabelController(service);
-export const cardLabelController = new CardLabelController(service);
+export const cardLabelController = new CardLabelController(service, automationService);
 
 export const labelsRouter = Router({ mergeParams: true });
 labelsRouter.get('/:boardId/labels', labelController.list);

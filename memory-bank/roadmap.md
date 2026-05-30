@@ -113,7 +113,7 @@
 - **Priority**: medium
 - **Complexity**: Level 3
 - **Description**: Simple trigger/action rules on cards: when a card moves to a column or gets a label/due date, automatically fire a configurable action (assign a label, move to another column, send a notification). Rules defined inline per-board with no separate automation page.
-- **Linked Tasks**: None
+- **Linked Tasks**: TASK-007 (planning_complete)
 - **Branch**: feature/FEAT-007-card-workflow-automation
 - **Created**: 2026-05-28
 

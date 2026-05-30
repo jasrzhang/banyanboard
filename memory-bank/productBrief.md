@@ -20,6 +20,7 @@
 - Search cards by title; filter by label or due date
 - Card detail modal for full task inspection and editing
 - Horizontally scrollable board layout with sidebar navigation
+- **Automation rules** — board-level if/then rules that fire automatically when a card is moved to a column or a label is assigned; supported actions: assign a label, move the card to another column, or notify (activity feed entry)
 
 ## Markets Serviced
 
@@ -282,6 +283,8 @@ src/
 - Card comments and file attachments
 - Mobile drag-and-drop (touch events)
 - JSON board export / import
+- Automation rule UI (frontend): create, view, and delete rules from the board settings panel
+- Multi-hop cycle detection for automation rules (currently detects 2-hop loops only)
 
 ## Open Questions
 
@@ -301,4 +304,4 @@ src/
 
 ## Last Refreshed
 
-2026-05-16 (frontend supplement applied)
+2026-05-30 (TASK-007 Phase 1: Automation Rules backend added to Key Functionality)
