@@ -1,7 +1,7 @@
 # Product Roadmap
 
 ## Summary
-- **Total Features**: 7
+- **Total Features**: 8
 - **Complete Features**: 7 (FEAT-001, FEAT-002, FEAT-003, FEAT-004, FEAT-005, FEAT-006, FEAT-007)
 - **Released Versions**: 0
 - **Active Versions**: 0
@@ -37,6 +37,7 @@
   - FEAT-005: Realtime Activity Feed [Level 3]
   - FEAT-006: Card Labels [Level 3]
   - FEAT-007: Card Workflow Automation [Level 3]
+  - FEAT-008: Basic User Administration [Level 3]
 
 ---
 
@@ -117,6 +118,18 @@
 - **Branch**: feature/FEAT-007-card-workflow-automation (merged 2026-05-30)
 - **Created**: 2026-05-28
 - **Completed**: 2026-05-30
+
+---
+
+### FEAT-008: Basic User Administration
+- **Version**: next
+- **Status**: planned
+- **Priority**: medium
+- **Complexity**: Level 3
+- **Description**: Lightweight user identity layer for BanyanBoard. User model: `{ id, firstName }` — firstName is 2–30 characters, letters and spaces only. Backend: `POST /api/users/login` accepts `{ firstName }` and returns `{ id, firstName }`. Session persists in `localStorage` under the key `'currentUser'`. Header displays "Hi, {firstName}" when a session exists; shows a Login link otherwise. Logout clears the session and redirects to `/login`. Login form shows an inline validation error for invalid firstName.
+- **Linked Tasks**: None
+- **Branch**: feature/FEAT-008-basic-user-administration
+- **Created**: 2026-05-30
 
 ---
 
