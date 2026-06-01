@@ -9,4 +9,4 @@
 | TASK-005 | Realtime Activity Feed | ARCHIVE | COMPLETE | FEAT-005 |
 | TASK-006 | Card Labels | ARCHIVE | COMPLETE | FEAT-006 |
 | TASK-007 | Card Workflow Automation | ARCHIVE | COMPLETE | FEAT-007 |
-| TASK-008 | Basic User Administration | BUILD | Phase 3/4 | FEAT-008 |
+| TASK-008 | Basic User Administration | BUILD | BUILD_COMPLETE | FEAT-008 |

@@ -318,8 +318,8 @@ Specification is concrete — proceed to implementation planning.
 - [x] `frontend/src/__tests__/loginPage.test.tsx`: 8 tests per Test Strategy Phase 3 table
 
 ### Phase 4: Frontend — GenericTopBar session display
-- [ ] `frontend/src/components/layout/GenericTopBar.tsx`: import `useCurrentUser`; render "Hi, {firstName}" + Logout button when user is set; render `<Link to="/login">Login</Link>` when user is null; Logout handler calls `clearUser()` then `navigate('/login')`
-- [ ] `frontend/src/__tests__/genericTopBar.test.tsx`: session greeting, login link, logout action
+- [x] `frontend/src/components/layout/GenericTopBar.tsx`: import `useCurrentUser`; render "Hi, {firstName}" + Logout button when user is set; render `<Link to="/login">Login</Link>` when user is null; Logout handler calls `clearUser()` then `navigate('/login')`
+- [x] `frontend/src/__tests__/genericTopBar.test.tsx`: session greeting, login link, logout action
 
 ---
 
@@ -331,14 +331,14 @@ None required — the feature is fully specified by FEAT-008. All design decisio
 
 ## Execution State
 
-**Build Status**: RUNNING
-**Current Build**: Phase 3 — LoginPage + router guards
+**Build Status**: BUILD_COMPLETE
+**Current Build**: Phase 4 — GenericTopBar session display
 **Build Started**: 2026-06-01
-**Phase Number**: 3 of 4
+**Phase Number**: 4 of 4
 **Is Multi-Phase**: YES
 
 ### Current Build Step
-**Step**: Step 11 - Git Commit (Phase 3 Complete)
+**Step**: Step 11 - Git Commit (Phase 4 Complete)
 **Status**: COMPLETE
 **Started**: 2026-06-01
 **Completed**: 2026-06-01
@@ -359,11 +359,15 @@ None required — the feature is fully specified by FEAT-008. All design decisio
 - Step 4 Coding Agent (Phase 3): COMPLETE (2026-06-01) - LoginPage, authGuards, router updated, routes.test.tsx fixed
 - Step 7 Integration Verification (Phase 3): COMPLETE (2026-06-01) - 163/163 tests pass, lint clean
 - Step 11 Git Commit (Phase 3): COMPLETE (2026-06-01) - Phase 3 committed to feature branch
+- Step 3 Test Writer (Phase 4): COMPLETE (2026-06-01) - 4 tests in genericTopBar.test.tsx
+- Step 4 Coding Agent (Phase 4): COMPLETE (2026-06-01) - GenericTopBar updated with useCurrentUser, Login/Logout UI
+- Step 7 Integration Verification (Phase 4): COMPLETE (2026-06-01) - 287/287 tests pass (120 backend + 167 frontend), build clean, lint clean
+- Step 11 Git Commit (Phase 4): COMPLETE (2026-06-01) - Phase 4 committed to feature branch
 
 ### Sub-Agents
 (none - implemented directly)
 
 ### Resumption Notes
-**Can Resume**: YES
-**Resume From**: Phase 4
-**Notes**: Phase 3 complete. Next: /banyan-build TASK-008 for Phase 4 (GenericTopBar session display)
+**Can Resume**: NO
+**Resume From**: N/A
+**Notes**: All 4 phases complete. Next: /banyan-reflect TASK-008
