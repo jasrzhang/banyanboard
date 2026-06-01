@@ -6,6 +6,7 @@ import { cardsRouter } from './routes/cards.js';
 import { activityRouter } from './routes/activity.js';
 import { labelsRouter } from './routes/labels.js';
 import { automationsRouter } from './routes/automations.js';
+import { usersRouter } from './routes/users.js';
 import { rootLogger } from './config/logger.js';
 import { createRequestContext } from './middleware/requestContext.js';
 import { requestLogger } from './middleware/requestLogger.js';
@@ -21,6 +22,7 @@ export function createApp(): Application {
   app.use('/api/boards', activityRouter);
   app.use('/api/boards', labelsRouter);
   app.use('/api/boards', automationsRouter);
+  app.use('/api/users', usersRouter);
   app.use('/api/columns', columnsRouter);
   app.use('/api/cards', cardsRouter);
   app.use((_req: Request, res: Response) => {
