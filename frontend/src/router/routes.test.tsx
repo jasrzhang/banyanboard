@@ -13,6 +13,9 @@ import { useBoard } from '../hooks/useBoard';
 const mockUseBoards = vi.mocked(useBoards);
 const mockUseBoard = vi.mocked(useBoard);
 
+const STORAGE_KEY = 'currentUser';
+const fixtureUser = { id: 'user-1', firstName: 'Test' };
+
 function renderRoute(path: string) {
   mockUseBoards.mockReturnValue({ data: [], isLoading: false } as unknown as ReturnType<typeof useBoards>);
   mockUseBoard.mockReturnValue({ data: undefined, isLoading: true, isError: false, error: null, refetch: vi.fn() } as unknown as ReturnType<typeof useBoard>);
@@ -27,7 +30,14 @@ function renderRoute(path: string) {
 }
 
 describe('Routes', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(fixtureUser));
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+  });
 
   it('renders BoardListPage at /boards', () => {
     renderRoute('/boards');

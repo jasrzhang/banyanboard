@@ -313,9 +313,9 @@ Specification is concrete — proceed to implementation planning.
 - [x] `frontend/src/__tests__/useCurrentUser.test.ts`: 5 unit tests per Test Strategy Phase 2 table
 
 ### Phase 3: Frontend — LoginPage + router guards
-- [ ] `frontend/src/pages/LoginPage.tsx`: firstName `<input>`, "Log in" `<button>`, inline `<span>` validation error, form-level `<p>` API error; client-side validates (trim + regex) before API call (AC-ERROR-1, AC-ERROR-4); disables button + input while request is pending (AC-ASYNC-1); on API rejection shows form-level error + re-enables button (AC-ASYNC-2); on success calls `setUser` then navigates to `/boards`; `aria-invalid` + `aria-describedby` wired to error span
-- [ ] `frontend/src/router/index.tsx`: add `{ path: 'login', element: <LoginPage /> }` as a top-level route (sibling of the `AppShell` root route); add `ProtectedRoute` wrapper or inline redirect in AppShell child routes that checks `useCurrentUser().user` and redirects to `/login` when null (AC-ENTRY-1); add redirect from `/login` to `/boards` when already authenticated (AC-ENTRY-2)
-- [ ] `frontend/src/__tests__/loginPage.test.tsx`: 8 tests per Test Strategy Phase 3 table
+- [x] `frontend/src/pages/LoginPage.tsx`: firstName `<input>`, "Log in" `<button>`, inline `<span>` validation error, form-level `<p>` API error; client-side validates (trim + regex) before API call (AC-ERROR-1, AC-ERROR-4); disables button + input while request is pending (AC-ASYNC-1); on API rejection shows form-level error + re-enables button (AC-ASYNC-2); on success calls `setUser` then navigates to `/boards`; `aria-invalid` + `aria-describedby` wired to error span
+- [x] `frontend/src/router/index.tsx`: `/login` route with `RedirectIfAuthed` wrapper; `RequireAuth` on AppShell (AC-ENTRY-1/2); both guards in `frontend/src/components/auth/authGuards.tsx`
+- [x] `frontend/src/__tests__/loginPage.test.tsx`: 8 tests per Test Strategy Phase 3 table
 
 ### Phase 4: Frontend — GenericTopBar session display
 - [ ] `frontend/src/components/layout/GenericTopBar.tsx`: import `useCurrentUser`; render "Hi, {firstName}" + Logout button when user is set; render `<Link to="/login">Login</Link>` when user is null; Logout handler calls `clearUser()` then `navigate('/login')`
@@ -331,14 +331,14 @@ None required — the feature is fully specified by FEAT-008. All design decisio
 
 ## Execution State
 
-**Build Status**: IDLE
-**Current Build**: Phase 2 COMPLETE — awaiting Phase 3
+**Build Status**: RUNNING
+**Current Build**: Phase 3 — LoginPage + router guards
 **Build Started**: 2026-06-01
-**Phase Number**: 2 of 4 COMPLETE
+**Phase Number**: 3 of 4
 **Is Multi-Phase**: YES
 
 ### Current Build Step
-**Step**: Step 11 - Git Commit (Phase 2 Complete)
+**Step**: Step 11 - Git Commit (Phase 3 Complete)
 **Status**: COMPLETE
 **Started**: 2026-06-01
 **Completed**: 2026-06-01
@@ -355,11 +355,15 @@ None required — the feature is fully specified by FEAT-008. All design decisio
 - Step 4 Coding Agent (Phase 2): COMPLETE (2026-06-01) - User type, usersApi, useCurrentUser hook, 5 tests
 - Step 7 Integration Verification (Phase 2): COMPLETE (2026-06-01) - 155/155 tests pass, lint clean
 - Step 11 Git Commit (Phase 2): COMPLETE (2026-06-01) - Phase 2 committed to feature branch
+- Step 3 Test Writer (Phase 3): COMPLETE (2026-06-01) - 8 tests in loginPage.test.tsx
+- Step 4 Coding Agent (Phase 3): COMPLETE (2026-06-01) - LoginPage, authGuards, router updated, routes.test.tsx fixed
+- Step 7 Integration Verification (Phase 3): COMPLETE (2026-06-01) - 163/163 tests pass, lint clean
+- Step 11 Git Commit (Phase 3): COMPLETE (2026-06-01) - Phase 3 committed to feature branch
 
 ### Sub-Agents
 (none - implemented directly)
 
 ### Resumption Notes
 **Can Resume**: YES
-**Resume From**: Phase 3
-**Notes**: Phase 2 complete. Next: /banyan-build TASK-008 for Phase 3 (LoginPage + router guards)
+**Resume From**: Phase 4
+**Notes**: Phase 3 complete. Next: /banyan-build TASK-008 for Phase 4 (GenericTopBar session display)
