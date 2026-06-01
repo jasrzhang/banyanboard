@@ -20,6 +20,7 @@
 | TASK-005 | 2026-05-25 | 4 | 1 | 1 |
 | TASK-006 | 2026-05-28 | 4 | 4 | 0 |
 | TASK-007 | 2026-05-30 | 4 | 3 | 0 |
+| TASK-008 | 2026-06-01 | 4 | 2 | 1 |
 
 ## Rule Effectiveness
 
@@ -29,12 +30,13 @@
 | testing-patterns.md | testing-patterns, eslint, zustand, react-router | 6 | **medium** | 2026-05-30 |
 | sse.md | sse, server-sent-events, testing-patterns, realtime | 2 | low | 2026-05-25 |
 | error-handling.md | error-handling, shutdown, abort-error | 2 | low | 2026-05-19 |
-| state-architecture.md | state-architecture, react, zustand | 2 | low | 2026-05-19 |
+| state-architecture.md | state-architecture, react, zustand, localStorage | 3 | **medium** | 2026-06-01 |
 | optimistic-updates.md | optimistic-updates, tanstack-query, frontend | 2 | low | 2026-05-28 |
 | ui-patterns.md | ui-patterns, accessibility, aria, react, api-client | 3 | **medium** | 2026-05-30 |
 | observability.md | observability, logging | 1 | low | 2026-05-16 |
 | toolchain-setup.md | toolchain-setup, vitest, npm, frontend | 1 | low | 2026-05-18 |
-| data-access.md | data-access, postgresql, repositories | 1 | low | 2026-05-19 |
+| data-access.md | data-access, postgresql, repositories | 2 | low | 2026-06-01 |
+| auth-testing.md | auth-testing, testing-patterns, react-router, localStorage | 1 | low | 2026-06-01 |
 
 ## Consolidation History
 

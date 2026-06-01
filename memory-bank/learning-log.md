@@ -149,3 +149,15 @@ Chronological record of pattern extraction and consolidation events from task re
 
 ### systemPatterns.md Updates
 - None (patterns are coding-level practices, not novel system-level architectural boundaries)
+
+---
+
+## 2026-06-01 - TASK-008 Reflection
+
+### Extracted Patterns
+- **auth-testing** → created `agent-rules/_learned/auth-testing.md` (evidence count: 1) — Seed localStorage session before router tests that use auth guards; use `renderHook` + `act()` for hook mutation assertions
+- **data-access** → amended `agent-rules/_learned/data-access.md` (evidence count: 2) — Idempotent upsert pattern: `INSERT ... ON CONFLICT DO UPDATE SET col = EXCLUDED.col RETURNING *` for single-round-trip upserts
+- **state-architecture** → amended `agent-rules/_learned/state-architecture.md` (evidence count: 3) — Pass initializer function reference (not invocation) to `useState` for side-effectful reads like `localStorage`
+
+### systemPatterns.md Updates
+- None (auth guard pattern is a frontend coding practice; upsert is a data-access pattern; lazy initializer is a React hook idiom — none rise to system-level architecture documentation)
