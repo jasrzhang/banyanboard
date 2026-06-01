@@ -307,10 +307,10 @@ Specification is concrete — proceed to implementation planning.
 - [x] `backend/src/__tests__/users.test.ts`: 8 integration tests per Test Strategy Phase 1 table
 
 ### Phase 2: Frontend — useCurrentUser hook + usersApi module
-- [ ] `frontend/src/types/domain.ts`: add `export interface User { id: string; firstName: string; }`
-- [ ] `frontend/src/api/usersApi.ts`: `login(firstName: string): Promise<User>` — calls `apiClient.post<User>('/api/users/login', { firstName })`
-- [ ] `frontend/src/hooks/useCurrentUser.ts`: reads `localStorage['currentUser']` on mount inside `try/catch` (corrupted JSON → returns `null`, AC-SESSION-2); exposes `{ user, setUser, clearUser }`. `setUser` writes `JSON.stringify(user)`; `clearUser` removes key. No direct localStorage access in components.
-- [ ] `frontend/src/__tests__/useCurrentUser.test.ts`: 5 unit tests per Test Strategy Phase 2 table
+- [x] `frontend/src/types/domain.ts`: add `export interface User { id: string; firstName: string; }`
+- [x] `frontend/src/api/usersApi.ts`: `login(firstName: string): Promise<User>` — calls `apiClient.post<User>('/api/users/login', { firstName })`
+- [x] `frontend/src/hooks/useCurrentUser.ts`: reads `localStorage['currentUser']` on mount inside `try/catch` (corrupted JSON → returns `null`, AC-SESSION-2); exposes `{ user, setUser, clearUser }`. `setUser` writes `JSON.stringify(user)`; `clearUser` removes key. No direct localStorage access in components.
+- [x] `frontend/src/__tests__/useCurrentUser.test.ts`: 5 unit tests per Test Strategy Phase 2 table
 
 ### Phase 3: Frontend — LoginPage + router guards
 - [ ] `frontend/src/pages/LoginPage.tsx`: firstName `<input>`, "Log in" `<button>`, inline `<span>` validation error, form-level `<p>` API error; client-side validates (trim + regex) before API call (AC-ERROR-1, AC-ERROR-4); disables button + input while request is pending (AC-ASYNC-1); on API rejection shows form-level error + re-enables button (AC-ASYNC-2); on success calls `setUser` then navigates to `/boards`; `aria-invalid` + `aria-describedby` wired to error span
@@ -331,14 +331,14 @@ None required — the feature is fully specified by FEAT-008. All design decisio
 
 ## Execution State
 
-**Build Status**: RUNNING
-**Current Build**: Phase 1: Backend — users table migration + POST /api/users/login (TASK-008)
+**Build Status**: IDLE
+**Current Build**: Phase 2 COMPLETE — awaiting Phase 3
 **Build Started**: 2026-06-01
-**Phase Number**: 1 of 4
+**Phase Number**: 2 of 4 COMPLETE
 **Is Multi-Phase**: YES
 
 ### Current Build Step
-**Step**: Step 11 - Git Commit (Phase 1 Complete)
+**Step**: Step 11 - Git Commit (Phase 2 Complete)
 **Status**: COMPLETE
 **Started**: 2026-06-01
 **Completed**: 2026-06-01
@@ -352,11 +352,14 @@ None required — the feature is fully specified by FEAT-008. All design decisio
 - Step 4 Coding Agent: COMPLETE (2026-06-01) - Migration, schema, repo, service, controller, route, app wired
 - Step 7 Integration Verification: COMPLETE (2026-06-01) - 120/120 tests pass, build clean, lint clean
 - Step 11 Git Commit: COMPLETE (2026-06-01) - Phase 1 committed to feature branch
+- Step 4 Coding Agent (Phase 2): COMPLETE (2026-06-01) - User type, usersApi, useCurrentUser hook, 5 tests
+- Step 7 Integration Verification (Phase 2): COMPLETE (2026-06-01) - 155/155 tests pass, lint clean
+- Step 11 Git Commit (Phase 2): COMPLETE (2026-06-01) - Phase 2 committed to feature branch
 
 ### Sub-Agents
 (none - implemented directly)
 
 ### Resumption Notes
 **Can Resume**: YES
-**Resume From**: Phase 2
-**Notes**: Phase 1 complete. Next: /banyan-build TASK-008 for Phase 2 (useCurrentUser hook + usersApi module)
+**Resume From**: Phase 3
+**Notes**: Phase 2 complete. Next: /banyan-build TASK-008 for Phase 3 (LoginPage + router guards)

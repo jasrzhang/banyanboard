@@ -1,3 +1,8 @@
+export interface User {
+  id: string;
+  firstName: string;
+}
+
 export interface Label {
   id: string;
   name: string;
